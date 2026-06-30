@@ -1,0 +1,46 @@
+<!-- Этот шаблон задает общую структуру и навигацию административной панели. -->
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Админка{% endblock %} · AI Consultant</title>
+    <link rel="stylesheet" href="/static/admin.css?v=2">
+</head>
+<body>
+    <header class="admin-header">
+        <a class="admin-brand" href="/admin">
+            <span class="admin-brand__mark" aria-hidden="true">A</span>
+            <span>
+                <strong>AI Consultant</strong>
+                <small>Управление заявками</small>
+            </span>
+        </a>
+        {% block navigation %}
+        {% if is_authenticated %}
+        <nav class="admin-nav" aria-label="Навигация админки">
+            <a href="/admin/leads">Заявки</a>
+            <a href="/admin/settings">Настройки доступа</a>
+            <form method="post" action="/admin/logout">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <button class="admin-nav__logout" type="submit">Выйти</button>
+            </form>
+        </nav>
+        {% endif %}
+        {% endblock %}
+    </header>
+
+    <main class="admin-main">
+        {% if flash %}
+        <div class="notice notice--success" role="status">{{ flash }}</div>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="admin-footer">
+        <span>Universal AI Site Consultant</span>
+        <span>{{ current_year }}</span>
+    </footer>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

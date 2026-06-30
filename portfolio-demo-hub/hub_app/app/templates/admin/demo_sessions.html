@@ -1,0 +1,39 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Demo sessions{% endblock %}
+{% block content %}
+<h1>Demo sessions</h1>
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>demo_session_id</th>
+        <th>project_id</th>
+        <th>started_at</th>
+        <th>last_seen_at</th>
+        <th>ended_at</th>
+        <th>duration_seconds</th>
+        <th>opened_demo</th>
+        <th>opened_admin</th>
+        <th>status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in sessions %}
+      <tr>
+        <td>{{ item.demo_session_id }}</td>
+        <td>{{ item.project_id }}</td>
+        <td>{{ item.started_at }}</td>
+        <td>{{ item.last_seen_at or "" }}</td>
+        <td>{{ item.ended_at or "" }}</td>
+        <td>{{ item.duration_seconds or "" }}</td>
+        <td>{{ "yes" if item.opened_demo else "no" }}</td>
+        <td>{{ "yes" if item.opened_admin else "no" }}</td>
+        <td>{{ item.status }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="9">Demo sessions пока нет.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

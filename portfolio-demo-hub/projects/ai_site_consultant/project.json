@@ -1,0 +1,57 @@
+{
+  "id": "ai-site-consultant",
+  "folder": "ai_site_consultant",
+  "is_active": true,
+  "order": 1,
+  "title": "AI-консультант для сайта",
+  "short_title": "AI Site Consultant",
+  "category": "AI Chat",
+  "status": "Демо доступно",
+  "short_description": "AI-чат для сайта, который отвечает посетителям, объясняет услуги и собирает заявки.",
+  "full_description": "Готовый AI-консультант для сайтов малого бизнеса. Работает по базе знаний компании, отвечает на вопросы клиентов, уточняет детали, помогает оставить заявку и показывает владельцу историю общения.",
+  "client_side_description": "Посетитель сайта открывает чат, задаёт вопрос, получает ответ по базе знаний компании и может оставить заявку без ожидания звонка менеджера.",
+  "owner_side_description": "Владелец бизнеса видит заявки, историю диалогов, контакты клиента, интересующую услугу, город и удобное время для связи.",
+  "business_value": [
+    "Сайт не теряет заявки",
+    "Клиент получает ответ сразу",
+    "AI работает по базе знаний компании",
+    "Можно адаптировать под разные ниши",
+    "Подходит для WordPress, Tilda, Wix и обычных сайтов"
+  ],
+  "features": [
+    "AI-ответы по базе знаний",
+    "RAG по markdown-файлам",
+    "Сбор имени, телефона, email, города и услуги",
+    "История диалога",
+    "Demo admin",
+    "Встраивание через script-виджет"
+  ],
+  "target_niches": [
+    "Адвокаты",
+    "Клиники",
+    "Риелторы",
+    "Ремонтные компании",
+    "Салоны красоты",
+    "Страховые агенты",
+    "Локальные сервисы"
+  ],
+  "tech_stack": [
+    "FastAPI",
+    "PostgreSQL",
+    "SQLAlchemy",
+    "Gemini",
+    "ChromaDB",
+    "sentence-transformers",
+    "HTML/CSS/JS",
+    "Docker"
+  ],
+  "preview_image": "/project-assets/ai_site_consultant/preview.png",
+  "video_url": "/project-assets/ai_site_consultant/video.mp4",
+  "demo_path": "/demo/ai-site-consultant/",
+  "admin_path": "/admin-demo/ai-site-consultant/",
+  "has_demo": true,
+  "has_admin_demo": true,
+  "cta_text": "Запустить демо",
+  "contact_cta_text": "Обсудить адаптацию AI-консультанта",
+  "price_note": "Стоимость зависит от ниши, объёма базы знаний, интеграций и нужной админки."
+}

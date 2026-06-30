@@ -1,0 +1,109 @@
+<!-- Этот шаблон показывает полную карточку заявки и историю диалога. -->
+{% extends "base.html" %}
+{% block title %}Заявка #{{ lead.id }}{% endblock %}
+{% block content %}
+<section class="page-heading page-heading--detail">
+    <div>
+        <a class="back-link" href="/admin/leads">← Все заявки</a>
+        <h1>Заявка #{{ lead.id }}</h1>
+        <p>Создана {{ lead.created_at_text }}</p>
+    </div>
+    <span class="status status--{{ lead.status }}">{{ lead.status_label }}</span>
+</section>
+
+<div class="detail-layout">
+    <section class="detail-section">
+        <h2>Контакт и задача</h2>
+        <dl class="detail-grid">
+            <div><dt>Имя</dt><dd>{{ lead.name }}</dd></div>
+            <div><dt>Телефон</dt><dd>{{ lead.phone }}</dd></div>
+            <div><dt>Email</dt><dd>{{ lead.email }}</dd></div>
+            <div><dt>Город</dt><dd>{{ lead.city }}</dd></div>
+            <div><dt>Услуга</dt><dd>{{ lead.service }}</dd></div>
+            <div><dt>Проблема</dt><dd>{{ lead.problem }}</dd></div>
+            <div>
+                <dt>Удобное время</dt>
+                <dd>{{ lead.preferred_contact_time }}</dd>
+            </div>
+            <div><dt>Session ID</dt><dd class="mono">{{ lead.session_id }}</dd></div>
+        </dl>
+        <div class="contact-actions">
+            {% if lead.tel_href %}
+            <a class="button button--primary" href="{{ lead.tel_href }}">
+                Позвонить
+            </a>
+            {% endif %}
+            {% if lead.whatsapp_href %}
+            <a
+                class="button button--secondary"
+                href="{{ lead.whatsapp_href }}"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                Открыть WhatsApp
+            </a>
+            {% endif %}
+        </div>
+    </section>
+
+    <aside class="detail-section detail-section--actions">
+        <h2>Обработка</h2>
+        <form method="post" action="/admin/leads/{{ lead.id }}/status">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <label class="field">
+                <span>Статус заявки</span>
+                <select name="status">
+                    {% for value, label in statuses.items() %}
+                    <option
+                        value="{{ value }}"
+                        {% if value == lead.status %}selected{% endif %}
+                    >
+                        {{ label }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </label>
+            <button class="button button--primary button--wide" type="submit">
+                Сохранить статус
+            </button>
+        </form>
+        <form
+            method="post"
+            action="/admin/leads/{{ lead.id }}/delete"
+            data-confirm-delete
+        >
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button class="button button--danger button--wide" type="submit">
+                Удалить заявку
+            </button>
+        </form>
+    </aside>
+</div>
+
+<section class="conversation-section">
+    <div class="section-heading">
+        <h2>Последние сообщения</h2>
+        <span>{{ messages|length }}</span>
+    </div>
+    {% if messages %}
+    <div class="conversation-list">
+        {% for message in messages %}
+        <article class="conversation-message conversation-message--{{ message.role }}">
+            <header>
+                <strong>
+                    {% if message.role == "user" %}Клиент{% else %}AI{% endif %}
+                </strong>
+                <time>{{ message.created_at.strftime("%d.%m.%Y %H:%M") }}</time>
+            </header>
+            <p>{{ message.content }}</p>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty-copy">История сообщений отсутствует.</p>
+    {% endif %}
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="/static/admin.js?v=1" defer></script>
+{% endblock %}

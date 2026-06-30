@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ project.short_title }} demo</title>
+  <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body class="launch-body"
+      data-project-id="{{ project.id }}"
+      data-demo-session-id="{{ demo_session_id }}"
+      data-session-id="{{ session_id }}"
+      data-demo-path="{{ project.demo_path }}"
+      data-admin-path="{{ project.admin_path }}"
+      data-demo-delete-path="{{ project.demo_path }}demo-session/{{ demo_session_id }}"
+      data-return-url="/projects/{{ project.id }}">
+  <header class="launch-bar">
+    <a class="launch-back" href="/projects/{{ project.id }}">← Назад</a>
+    <div class="launch-title">
+      <span>{{ project.short_title }}</span>
+      <strong>Demo session</strong>
+    </div>
+    <div class="launch-tabs">
+      <button class="button small primary" type="button" data-launch-tab="demo">Демо</button>
+      {% if project.has_admin_demo %}
+        <button class="button small" type="button" data-launch-tab="admin">Админка</button>
+      {% endif %}
+    </div>
+    <button class="button small danger" type="button" data-finish-demo>Завершить демо</button>
+  </header>
+  <iframe id="demo-frame" title="{{ project.short_title }}" src=""></iframe>
+  <script src="/static/js/analytics.js"></script>
+  <script src="/static/js/launch.js"></script>
+</body>
+</html>

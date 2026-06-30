@@ -1,0 +1,42 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Leads{% endblock %}
+{% block content %}
+<h1>Заявки</h1>
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Дата</th>
+        <th>Имя</th>
+        <th>Телефон</th>
+        <th>Email</th>
+        <th>Тип клиента</th>
+        <th>Проект</th>
+        <th>Сообщение</th>
+        <th>Статус</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for lead in leads %}
+      <tr>
+        <td>{{ lead.created_at }}</td>
+        <td>{{ lead.name }}</td>
+        <td>{{ lead.phone or "" }}</td>
+        <td>{{ lead.email or "" }}</td>
+        <td>{{ lead.client_type or "" }}</td>
+        <td>{{ lead.project_id or "" }}</td>
+        <td>{{ lead.message or "" }}</td>
+        <td>{{ lead.status }}</td>
+        <td class="table-actions">
+          <form method="post" action="/admin/leads/{{ lead.id }}/viewed"><button type="submit">Viewed</button></form>
+          <form method="post" action="/admin/leads/{{ lead.id }}/archive"><button type="submit">Archive</button></form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="9">Заявок пока нет.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,124 @@
+{
+  "client_id": "notary_demo",
+  "scenario_key": "notary_request",
+  "version": "1.0",
+  "currency": "₪",
+  "default_estimate_message": "Стоимость нужно уточнить после проверки документов.",
+  "disclaimer": "Стоимость является ориентировочной. Точная цена определяется нотариусом после проверки документов и уточнения деталей.",
+  "rules": [
+    {
+      "id": "notary_translation_1_page",
+      "priority": 100,
+      "when": {
+        "service_type": "notary_translation",
+        "page_count": "1"
+      },
+      "price_min": 150,
+      "price_max": 250,
+      "estimate_message": "Ориентировочная стоимость нотариального перевода одной страницы."
+    },
+    {
+      "id": "notary_translation_2_3_pages",
+      "priority": 90,
+      "when": {
+        "service_type": "notary_translation",
+        "page_count": "2_3"
+      },
+      "price_min": 300,
+      "price_max": 700,
+      "estimate_message": "Ориентировочная стоимость зависит от языка, объема и сложности документа."
+    },
+    {
+      "id": "notary_translation_large",
+      "priority": 80,
+      "when": {
+        "service_type": "notary_translation",
+        "page_count": "4_10"
+      },
+      "price_min": 800,
+      "price_max": 2200,
+      "estimate_message": "Ориентировочная стоимость нотариального перевода 4–10 страниц. Точная сумма зависит от языка, объема и сложности документа."
+    },
+    {
+      "id": "notary_translation_10_plus",
+      "priority": 80,
+      "when": {
+        "service_type": "notary_translation",
+        "page_count": "10_plus"
+      },
+      "price_min": 2200,
+      "price_max": 5000,
+      "estimate_message": "Ориентировочная стоимость нотариального перевода большого документа. Точная сумма уточняется после проверки объема и сложности."
+    },
+    {
+      "id": "signature_verification",
+      "priority": 70,
+      "when": {
+        "service_type": "signature_verification"
+      },
+      "price_min": 150,
+      "price_max": null,
+      "estimate_message": "Ориентировочная стоимость заверения подписи начинается от указанной суммы."
+    },
+    {
+      "id": "power_of_attorney",
+      "priority": 70,
+      "when": {
+        "service_type": "power_of_attorney"
+      },
+      "price_min": 250,
+      "price_max": null,
+      "estimate_message": "Ориентировочная стоимость доверенности начинается от указанной суммы и зависит от текста документа."
+    },
+    {
+      "id": "document_copy",
+      "priority": 60,
+      "when": {
+        "service_type": "document_copy"
+      },
+      "price_min": 100,
+      "price_max": null,
+      "estimate_message": "Ориентировочная стоимость заверенной копии начинается от указанной суммы."
+    },
+    {
+      "id": "apostille",
+      "priority": 50,
+      "when": {
+        "service_type": "apostille"
+      },
+      "price_min": null,
+      "price_max": null,
+      "estimate_message": "Стоимость апостиля нужно уточнить после проверки документа."
+    },
+    {
+      "id": "affidavit",
+      "priority": 50,
+      "when": {
+        "service_type": "affidavit"
+      },
+      "price_min": null,
+      "price_max": null,
+      "estimate_message": "Стоимость аффидевита или декларации нужно уточнить после проверки деталей."
+    },
+    {
+      "id": "consultation",
+      "priority": 40,
+      "when": {
+        "service_type": "consultation"
+      },
+      "price_min": null,
+      "price_max": null,
+      "estimate_message": "Стоимость консультации уточняется индивидуально."
+    },
+    {
+      "id": "other",
+      "priority": 10,
+      "when": {
+        "service_type": "other"
+      },
+      "price_min": null,
+      "price_max": null,
+      "estimate_message": "Стоимость услуги нужно уточнить после описания задачи."
+    }
+  ]
+}

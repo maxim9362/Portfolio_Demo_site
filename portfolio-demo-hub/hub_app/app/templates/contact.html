@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Связаться | Maxim AI Automation{% endblock %}
+{% block content %}
+<section class="form-shell contact-shell">
+  <div class="contact-copy">
+    <p class="eyebrow">Заявка</p>
+    <h1>Хотите адаптировать один из проектов под свой бизнес или клиентский сайт?</h1>
+    <p class="lead">Оставьте контакт, и я свяжусь с вами. Можно обсудить AI-чат, WhatsApp-бота, умную форму заявок или demo/admin часть для клиента.</p>
+    <div class="contact-points">
+      <span>Без email-рассылок</span>
+      <span>Заявка сохраняется в админке</span>
+      <span>Можно указать конкретный проект</span>
+    </div>
+  </div>
+  <form class="contact-form" id="contact-form">
+    <label>Имя
+      <input name="name" required autocomplete="name" placeholder="Как к вам обращаться">
+    </label>
+    <div class="two-cols">
+      <label>Телефон
+        <input name="phone" autocomplete="tel" placeholder="+972...">
+      </label>
+      <label>Email
+        <input name="email" type="email" autocomplete="email" placeholder="name@example.com">
+      </label>
+    </div>
+    <label>Тип клиента
+      <select name="client_type">
+        <option value="">Не выбрано</option>
+        <option value="business_owner">Владелец бизнеса</option>
+        <option value="agency">Агентство</option>
+        <option value="designer">Дизайнер / разработчик</option>
+        <option value="other">Другое</option>
+      </select>
+    </label>
+    <label>Проект
+      <select name="project_id">
+        <option value="">Общий запрос</option>
+        {% for project in projects %}
+          <option value="{{ project.id }}" {% if selected_project_id == project.id %}selected{% endif %}>{{ project.title }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Сообщение
+      <textarea name="message" rows="5" placeholder="Коротко опишите задачу или нишу"></textarea>
+    </label>
+    <input type="hidden" name="source_page" value="{{ request.url }}">
+    <button class="button primary large" type="submit">Отправить заявку</button>
+    <p class="form-status" id="form-status" role="status"></p>
+  </form>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+  const form = document.getElementById("contact-form");
+  const statusNode = document.getElementById("form-status");
+  window.PortfolioAnalytics?.track?.("contact_open", {});
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const payload = Object.fromEntries(new FormData(form).entries());
+    payload.session_id = window.PortfolioAnalytics?.getSessionId?.();
+    const response = await fetch("/api/contact", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(payload)
+    });
+    if (response.ok) {
+      statusNode.classList.add("success");
+      statusNode.textContent = "Спасибо! Заявка сохранена.";
+      form.reset();
+      return;
+    }
+    const data = await response.json().catch(() => ({}));
+    statusNode.classList.remove("success");
+    statusNode.textContent = data.detail || "Проверьте имя и телефон или email.";
+  });
+</script>
+{% endblock %}

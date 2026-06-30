@@ -1,0 +1,57 @@
+<!-- Этот файл демонстрирует подключение chat widget одной строкой. -->
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Демонстрация Chat Widget</title>
+    <link rel="icon" href="data:,">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Georgia, serif;
+            color: #231f20;
+            background: #f6f0e8;
+        }
+
+        main {
+            width: min(880px, calc(100% - 40px));
+            margin: 0 auto;
+            padding: 72px 0;
+        }
+
+        h1 {
+            max-width: 680px;
+            margin: 0;
+            font-size: 48px;
+            line-height: 1.08;
+        }
+
+        p {
+            max-width: 620px;
+            font-size: 19px;
+            line-height: 1.7;
+        }
+
+        button {
+            padding: 12px 18px;
+            color: #fff;
+            background: #7b2d26;
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>Тестовая страница сайта клиента</h1>
+        <p>
+            Эта страница использует собственные стили, шрифты и кнопки.
+            Виджет должен работать поверх нее без конфликтов оформления.
+        </p>
+        <button type="button">Кнопка сайта клиента</button>
+    </main>
+
+    <script src="http://127.0.0.1:8000/widget/chat-widget.js"></script>
+</body>
+</html>

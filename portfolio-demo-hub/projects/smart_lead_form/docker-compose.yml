@@ -1,0 +1,10 @@
+services:
+  app:
+    build: .
+    container_name: smart_lead_form_app
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app

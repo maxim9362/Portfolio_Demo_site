@@ -1,0 +1,81 @@
+<!-- Этот шаблон позволяет изменить логин и пароль администратора. -->
+{% extends "base.html" %}
+{% block title %}Настройки доступа{% endblock %}
+{% block content %}
+<section class="page-heading">
+    <div>
+        <span class="eyebrow">Безопасность</span>
+        <h1>Настройки доступа</h1>
+        <p>Изменение единственной учетной записи этой установки.</p>
+    </div>
+</section>
+
+<form class="settings-form" method="post" action="/admin/settings">
+    {% if error %}
+    <div class="notice notice--error" role="alert">{{ error }}</div>
+    {% endif %}
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+    <div class="settings-section">
+        <h2>Логин</h2>
+        <div class="form-grid">
+            <label class="field">
+                <span>Текущий логин</span>
+                <input type="text" value="{{ admin.username }}" disabled>
+            </label>
+            <label class="field">
+                <span>Новый логин</span>
+                <input
+                    name="new_username"
+                    type="text"
+                    maxlength="128"
+                    autocomplete="username"
+                    placeholder="Оставьте пустым, чтобы не менять"
+                >
+            </label>
+        </div>
+    </div>
+
+    <div class="settings-section">
+        <h2>Подтверждение</h2>
+        <label class="field">
+            <span>Текущий пароль</span>
+            <input
+                name="current_password"
+                type="password"
+                autocomplete="current-password"
+                required
+            >
+        </label>
+    </div>
+
+    <div class="settings-section">
+        <h2>Новый пароль</h2>
+        <div class="form-grid">
+            <label class="field">
+                <span>Новый пароль</span>
+                <input
+                    name="new_password"
+                    type="password"
+                    minlength="8"
+                    autocomplete="new-password"
+                    placeholder="Минимум 8 символов"
+                >
+            </label>
+            <label class="field">
+                <span>Повтор нового пароля</span>
+                <input
+                    name="new_password_confirm"
+                    type="password"
+                    minlength="8"
+                    autocomplete="new-password"
+                >
+            </label>
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <button class="button button--primary" type="submit">Сохранить</button>
+    </div>
+</form>
+{% endblock %}

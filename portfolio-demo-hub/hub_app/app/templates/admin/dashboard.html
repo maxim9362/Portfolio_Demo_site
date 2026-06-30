@@ -1,0 +1,52 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="admin-title">
+  <div>
+    <p class="eyebrow">Admin</p>
+    <h1>Dashboard</h1>
+  </div>
+  <a class="button small" href="/">Открыть сайт</a>
+</div>
+
+<div class="metric-grid">
+  <div><span>Визиты</span><strong>{{ metrics.visits }}</strong></div>
+  <div><span>Заявки</span><strong>{{ metrics.leads }}</strong></div>
+  <div><span>Запуски демо</span><strong>{{ metrics.demo_launches }}</strong></div>
+  <div><span>Среднее время на сайте</span><strong>{{ metrics.avg_site }} c</strong></div>
+  <div><span>Среднее время в демо</span><strong>{{ metrics.avg_demo }} c</strong></div>
+</div>
+
+<section class="admin-section">
+  <div class="section-heading compact">
+    <h2>Последние события</h2>
+    <a class="text-link" href="/admin/analytics">Все события</a>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>created_at</th>
+          <th>event_type</th>
+          <th>session_id</th>
+          <th>project_id</th>
+          <th>page_url</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for event in recent_events %}
+        <tr>
+          <td>{{ event.created_at }}</td>
+          <td>{{ event.event_type }}</td>
+          <td>{{ event.session_id or "" }}</td>
+          <td>{{ event.project_id or "" }}</td>
+          <td>{{ event.page_url or "" }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5">Событий пока нет.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

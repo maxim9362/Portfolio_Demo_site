@@ -1,0 +1,109 @@
+from typing import Any
+
+from fastapi import APIRouter, Depends, HTTPException, Request
+from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
+
+from app.db.database import get_db
+from app.db.models import ContactLead
+from app.services.analytics import finish_demo_session, record_event
+
+router = APIRouter(prefix="/api")
+
+
+class ContactPayload(BaseModel):
+    name: str = Field(min_length=1)
+    phone: str | None = None
+    email: str | None = None
+    client_type: str | None = None
+    project_id: str | None = None
+    message: str | None = None
+    source_page: str | None = None
+    session_id: str | None = None
+
+
+class AnalyticsPayload(BaseModel):
+    event_type: str
+    session_id: str | None = None
+    demo_session_id: str | None = None
+    project_id: str | None = None
+    page_url: str | None = None
+    metadata: dict[str, Any] | None = None
+
+
+class HeartbeatPayload(BaseModel):
+    session_id: str
+    demo_session_id: str | None = None
+    project_id: str | None = None
+    page_url: str | None = None
+
+
+@router.post("/contact")
+def submit_contact(payload: ContactPayload, request: Request, db: Session = Depends(get_db)) -> dict[str, Any]:
+    if not payload.name.strip():
+        raise HTTPException(status_code=422, detail="Name is required")
+    if not (payload.phone and payload.phone.strip()) and not (payload.email and payload.email.strip()):
+        raise HTTPException(status_code=422, detail="Phone or email is required")
+
+    lead = ContactLead(**payload.model_dump())
+    db.add(lead)
+    record_event(
+        db,
+        "contact_submit",
+        session_id=payload.session_id,
+        project_id=payload.project_id,
+        page_url=payload.source_page,
+        request=request,
+    )
+    db.commit()
+    db.refresh(lead)
+    return {"success": True, "lead_id": lead.id}
+
+
+@router.post("/analytics/event")
+def analytics_event(payload: AnalyticsPayload, request: Request, db: Session = Depends(get_db)) -> dict[str, bool]:
+    record_event(
+        db,
+        payload.event_type,
+        session_id=payload.session_id,
+        demo_session_id=payload.demo_session_id,
+        project_id=payload.project_id,
+        page_url=payload.page_url,
+        metadata=payload.metadata,
+        request=request,
+    )
+    db.commit()
+    return {"success": True}
+
+
+@router.post("/analytics/heartbeat")
+def analytics_heartbeat(payload: HeartbeatPayload, request: Request, db: Session = Depends(get_db)) -> dict[str, bool]:
+    record_event(
+        db,
+        "heartbeat",
+        session_id=payload.session_id,
+        demo_session_id=payload.demo_session_id,
+        project_id=payload.project_id,
+        page_url=payload.page_url,
+        request=request,
+    )
+    db.commit()
+    return {"success": True}
+
+
+@router.post("/demo-session/{demo_session_id}/finish")
+def demo_finish(demo_session_id: str, request: Request, db: Session = Depends(get_db)) -> dict[str, bool]:
+    demo = finish_demo_session(db, demo_session_id)
+    if not demo:
+        raise HTTPException(status_code=404, detail="Demo session not found")
+    record_event(
+        db,
+        "demo_finish",
+        session_id=demo.session_id,
+        demo_session_id=demo_session_id,
+        project_id=demo.project_id,
+        page_url=str(request.url),
+        request=request,
+    )
+    db.commit()
+    return {"success": True}

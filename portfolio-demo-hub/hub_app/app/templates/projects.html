@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Проекты | Maxim AI Automation{% endblock %}
+{% block content %}
+<section class="page-hero">
+  <p class="eyebrow">Каталог demo projects</p>
+  <h1>AI-решения, которые можно открыть и протестировать</h1>
+  <p class="lead">Каждый проект показывает понятный бизнес-сценарий: что видит клиент, что получает владелец и как выглядит demo/admin часть.</p>
+</section>
+
+<section class="section">
+  <div class="project-grid">
+    {% for project in projects %}
+      {% include "project_card.html" %}
+    {% else %}
+      <p>Проекты пока не добавлены.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

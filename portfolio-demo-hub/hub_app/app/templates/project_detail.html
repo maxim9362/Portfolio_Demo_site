@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}{{ project.title }} | Maxim AI Automation{% endblock %}
+{% block content %}
+<section class="project-hero">
+  <div>
+    <div class="card-top inline">
+      <span class="badge soft">{{ project.category }}</span>
+      <strong class="status-badge">{{ project.status }}</strong>
+    </div>
+    <h1>{{ project.title }}</h1>
+    <p class="lead">{{ project.full_description }}</p>
+    <div class="actions">
+      {% if project.has_demo %}
+        <a class="button primary large" data-launch-link data-track-event="project_demo_button_click" href="/launch/{{ project.id }}">{{ project.cta_text }}</a>
+      {% endif %}
+      <a class="button large" href="/contact?project_id={{ project.id }}" data-track-event="contact_button_click">{{ project.contact_cta_text }}</a>
+    </div>
+    <p class="muted">{{ project.price_note }}</p>
+  </div>
+  {% if project.preview_image %}
+    <img class="project-hero-media" src="{{ project.preview_image }}" alt="{{ project.title }}">
+  {% else %}
+    <div class="project-hero-media placeholder">
+      <span>{{ project.short_title }}</span>
+    </div>
+  {% endif %}
+</section>
+
+<section class="section">
+  <div class="media-placeholder">
+    {% if project.video_url %}
+      {% if project.video_url.endswith(".mp4") %}
+        <video controls preload="metadata" poster="{{ project.preview_image }}">
+          <source src="{{ project.video_url }}" type="video/mp4">
+        </video>
+      {% else %}
+        <iframe title="{{ project.title }} video" src="{{ project.video_url }}" allowfullscreen></iframe>
+      {% endif %}
+    {% else %}
+      <strong>Видео будет добавлено позже</strong>
+      <p>Пока можно открыть live demo и проверить сценарий вручную.</p>
+    {% endif %}
+  </div>
+</section>
+
+<section class="detail-content full">
+  <section>
+    <p class="eyebrow">Описание</p>
+    <h2>Что делает проект</h2>
+    <p>{{ project.full_description }}</p>
+  </section>
+  <section class="two-panel">
+    <div>
+      <p class="eyebrow">Клиент</p>
+      <h2>Что видит клиент</h2>
+      <p>{{ project.client_side_description }}</p>
+    </div>
+    <div>
+      <p class="eyebrow">Бизнес</p>
+      <h2>Что видит владелец</h2>
+      <p>{{ project.owner_side_description }}</p>
+    </div>
+  </section>
+  <section>
+    <p class="eyebrow">Польза</p>
+    <h2>Польза для бизнеса</h2>
+    <ul class="check-list columns">
+      {% for item in project.business_value %}
+        <li>{{ item }}</li>
+      {% endfor %}
+    </ul>
+  </section>
+  <section>
+    <p class="eyebrow">Функции</p>
+    <h2>Что входит</h2>
+    <div class="tag-row large">
+      {% for item in project.features %}
+        <span>{{ item }}</span>
+      {% endfor %}
+    </div>
+  </section>
+  <section>
+    <p class="eyebrow">Ниши</p>
+    <h2>Для каких ниш подходит</h2>
+    <div class="tag-row large">
+      {% for item in project.target_niches %}
+        <span>{{ item }}</span>
+      {% endfor %}
+    </div>
+  </section>
+  <section>
+    <p class="eyebrow">Технологии</p>
+    <h2>Tech stack</h2>
+    <div class="tag-row large tech">
+      {% for item in project.tech_stack %}
+        <span>{{ item }}</span>
+      {% endfor %}
+    </div>
+  </section>
+</section>
+
+<section class="cta-band">
+  <div>
+    <p class="eyebrow">Готовы проверить?</p>
+    <h2>Запустите демо или обсудите адаптацию под свою нишу</h2>
+  </div>
+  <div class="actions">
+    {% if project.has_demo %}
+      <a class="button primary large" data-launch-link data-track-event="project_demo_button_click" href="/launch/{{ project.id }}">{{ project.cta_text }}</a>
+    {% endif %}
+    <a class="button large" href="/contact?project_id={{ project.id }}" data-track-event="contact_button_click">Связаться</a>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+  document.querySelectorAll("[data-launch-link]").forEach((link) => {
+    link.addEventListener("click", () => {
+      const sessionId = window.PortfolioAnalytics?.getSessionId?.();
+      if (sessionId) {
+        link.href = `/launch/{{ project.id }}?session_id=${encodeURIComponent(sessionId)}`;
+      }
+    });
+  });
+</script>
+{% endblock %}
