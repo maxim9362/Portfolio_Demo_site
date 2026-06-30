@@ -1,12 +1,14 @@
 from typing import Any
+from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
-from app.db.models import ContactLead
+from app.db.models import ContactLead, DemoSession
 from app.services.analytics import finish_demo_session, record_event
+from app.services.project_loader import get_project
 
 router = APIRouter(prefix="/api")
 
@@ -35,6 +37,12 @@ class HeartbeatPayload(BaseModel):
     session_id: str
     demo_session_id: str | None = None
     project_id: str | None = None
+    page_url: str | None = None
+
+
+class DemoSessionStartPayload(BaseModel):
+    session_id: str | None = None
+    previous_demo_session_id: str | None = None
     page_url: str | None = None
 
 
@@ -89,6 +97,46 @@ def analytics_heartbeat(payload: HeartbeatPayload, request: Request, db: Session
     )
     db.commit()
     return {"success": True}
+
+
+@router.post("/demo-session/{project_id}/start")
+def demo_start(
+    project_id: str,
+    payload: DemoSessionStartPayload,
+    request: Request,
+    db: Session = Depends(get_db),
+) -> dict[str, str]:
+    project = get_project(project_id)
+    if not project or not project.get("has_demo"):
+        raise HTTPException(status_code=404, detail="Demo not found")
+
+    if payload.previous_demo_session_id:
+        finish_demo_session(db, payload.previous_demo_session_id)
+
+    session_id = payload.session_id or f"session_{uuid4().hex}"
+    demo_session_id = f"demo_{uuid4().hex}"
+    db.add(
+        DemoSession(
+            demo_session_id=demo_session_id,
+            session_id=session_id,
+            project_id=project_id,
+            opened_demo=True,
+        )
+    )
+    record_event(
+        db,
+        "demo_launch",
+        session_id=session_id,
+        demo_session_id=demo_session_id,
+        project_id=project_id,
+        page_url=payload.page_url or str(request.url),
+        request=request,
+    )
+    db.commit()
+    return {
+        "session_id": session_id,
+        "demo_session_id": demo_session_id,
+    }
 
 
 @router.post("/demo-session/{demo_session_id}/finish")

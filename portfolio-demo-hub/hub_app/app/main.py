@@ -11,6 +11,7 @@ from app.db.database import Base, engine
 from app.routes import admin, api, pages
 
 logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("uvicorn.error")
 
 app = FastAPI(title="Portfolio Demo Hub")
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
@@ -20,6 +21,22 @@ templates = Jinja2Templates(directory="app/templates")
 @app.on_event("startup")
 def on_startup() -> None:
     Base.metadata.create_all(bind=engine)
+    logger.info(
+        "\n"
+        "============================================================\n"
+        "Portfolio Demo Hub started\n"
+        "\n"
+        "Main site:\n"
+        "http://localhost/\n"
+        "\n"
+        "Main admin:\n"
+        "http://localhost/admin\n"
+        "\n"
+        "Admin Basic Auth:\n"
+        "username: admin\n"
+        "password: change_me\n"
+        "============================================================"
+    )
 
 
 @app.get("/health")

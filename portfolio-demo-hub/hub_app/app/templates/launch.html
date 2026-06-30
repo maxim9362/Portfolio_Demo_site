@@ -25,7 +25,15 @@
       {% if project.has_admin_demo %}
         <button class="button small" type="button" data-launch-tab="admin">Админка</button>
       {% endif %}
+      <button class="button small" type="button" data-new-chat>Новый чат</button>
     </div>
+    {% if project.admin_demo_credentials %}
+      <div class="launch-credentials" aria-label="Доступ в demo admin">
+        <span>Admin demo</span>
+        <code>{{ project.admin_demo_credentials.username }}</code>
+        <code>{{ project.admin_demo_credentials.password }}</code>
+      </div>
+    {% endif %}
     <button class="button small danger" type="button" data-finish-demo>Завершить демо</button>
   </header>
   <iframe id="demo-frame" title="{{ project.short_title }}" src=""></iframe>

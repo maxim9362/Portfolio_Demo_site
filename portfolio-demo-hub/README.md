@@ -167,3 +167,37 @@ app/
 
 - Email-уведомления
 - Alembic
+## Real Demo Projects
+
+Portfolio Demo Hub запускает реальные проекты, а не тестовые формы-заглушки:
+
+- `projects/ai_site_consultant` - реальный проект `AI_Chat_Web` / Universal AI Site Consultant.
+- `projects/smart_lead_form` - реальный проект Smart Lead Form / Cost Calculator.
+
+Каждый demo project запускается как отдельное Docker-приложение. Основные файлы проектов лежат в корне их папок:
+
+```text
+app/
+knowledge/ или widget/
+scripts/
+Dockerfile
+requirements.txt
+.env.example
+README.md
+project.json
+```
+
+Проверка после `docker compose up --build`:
+
+- `http://localhost/demo/ai-site-consultant/`
+- `http://localhost/launch/ai-site-consultant`
+- `http://localhost/demo/smart-lead-form/`
+- `http://localhost/launch/smart-lead-form`
+
+AI demo должно показывать реальный лендинг AI_Chat_Web с подключенным AI-чатом, а не страницу `Demo session` с простой формой. Smart demo должно показывать реальный Smart Lead Form с `SmartLeadFormConfig`, а не тестовую форму.
+
+Базы PostgreSQL разделены:
+
+- `portfolio` - таблицы Portfolio Hub.
+- `ai_consultant` - таблицы AI_Chat_Web.
+- `smart_lead_form` - таблицы Smart Lead Form.

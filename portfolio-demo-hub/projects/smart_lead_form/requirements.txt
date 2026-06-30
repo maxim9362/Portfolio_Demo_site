@@ -1,6 +1,7 @@
-fastapi==0.115.6
-psycopg[binary]==3.2.3
-pydantic-settings==2.7.1
-SQLAlchemy==2.0.36
-uvicorn[standard]==0.34.0
-python-multipart==0.0.20
+fastapi
+uvicorn[standard]
+sqlalchemy
+psycopg2-binary
+pydantic
+pydantic-settings
+python-dotenv

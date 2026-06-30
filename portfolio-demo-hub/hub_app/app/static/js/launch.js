@@ -1,11 +1,12 @@
 (function () {
   const body = document.body;
   const frame = document.getElementById("demo-frame");
-  const demoSessionId = body.dataset.demoSessionId;
-  const sessionId = body.dataset.sessionId;
+  let demoSessionId = body.dataset.demoSessionId;
+  let sessionId = body.dataset.sessionId;
   const projectId = body.dataset.projectId;
   const returnUrl = body.dataset.returnUrl;
-  const demoDeletePath = body.dataset.demoDeletePath;
+  let demoDeletePath = body.dataset.demoDeletePath;
+  let activeTab = "demo";
 
   function withParams(path) {
     const url = new URL(path, window.location.origin);
@@ -29,7 +30,29 @@
     }).catch(() => {});
   }
 
+  function clearEmbeddedDemoStorage() {
+    const prefixes = [
+      "uaisc_session_id:",
+      `uaisc_session_id:${window.location.origin}`,
+      `uaisc_session_id:${window.location.origin}${body.dataset.demoPath.replace(/\/$/, "")}`,
+      `uaisc_session_id:${window.location.origin}${body.dataset.demoPath}`,
+    ];
+
+    for (const storage of [window.localStorage, window.sessionStorage]) {
+      try {
+        Object.keys(storage).forEach((key) => {
+          if (prefixes.some((prefix) => key.startsWith(prefix))) {
+            storage.removeItem(key);
+          }
+        });
+      } catch (storageError) {
+        console.warn("Demo storage cleanup failed.", storageError);
+      }
+    }
+  }
+
   function openTab(tab) {
+    activeTab = tab;
     document.querySelectorAll("[data-launch-tab]").forEach((button) => {
       button.classList.toggle("active", button.dataset.launchTab === tab);
     });
@@ -45,6 +68,42 @@
 
   document.querySelectorAll("[data-launch-tab]").forEach((button) => {
     button.addEventListener("click", () => openTab(button.dataset.launchTab));
+  });
+
+  document.querySelector("[data-new-chat]")?.addEventListener("click", async () => {
+    const button = document.querySelector("[data-new-chat]");
+    button.disabled = true;
+    try {
+      await fetch(`/api/demo-session/${encodeURIComponent(demoSessionId)}/finish`, {
+        method: "POST",
+        keepalive: true
+      }).catch(() => {});
+
+      const newSessionPart = globalThis.crypto?.randomUUID
+        ? globalThis.crypto.randomUUID()
+        : String(Date.now());
+      const response = await fetch(`/api/demo-session/${encodeURIComponent(projectId)}/start`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          session_id: `session_${newSessionPart}`,
+          previous_demo_session_id: demoSessionId,
+          page_url: window.location.href
+        })
+      });
+      const payload = await response.json();
+      sessionId = payload.session_id;
+      demoSessionId = payload.demo_session_id;
+      demoDeletePath = `${body.dataset.demoPath}demo-session/${demoSessionId}`;
+      body.dataset.sessionId = sessionId;
+      body.dataset.demoSessionId = demoSessionId;
+      body.dataset.demoDeletePath = demoDeletePath;
+      clearEmbeddedDemoStorage();
+      openTab("demo");
+      track("demo_tab_open");
+    } finally {
+      button.disabled = false;
+    }
   });
 
   document.querySelector("[data-finish-demo]").addEventListener("click", async () => {

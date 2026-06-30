@@ -16,12 +16,13 @@ COPY requirements.txt .
 RUN pip install --upgrade pip \
     && pip install -r requirements.txt
 
-COPY project_app/app ./app
-COPY project_app/knowledge ./knowledge
-COPY project_app/scripts ./scripts
+COPY app ./app
+COPY knowledge ./knowledge
+COPY scripts ./scripts
 
-RUN mkdir -p /app/chroma_data
+RUN chmod +x /app/scripts/start.sh \
+    && mkdir -p /app/chroma_data
 
 EXPOSE 8000
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["/app/scripts/start.sh"]

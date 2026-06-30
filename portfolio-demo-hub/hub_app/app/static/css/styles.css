@@ -678,6 +678,34 @@ textarea:focus {
   color: var(--ink);
 }
 
+.launch-credentials {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  color: #dfe7f0;
+  display: flex;
+  gap: 8px;
+  min-height: 38px;
+  padding: 6px 9px;
+  white-space: nowrap;
+}
+
+.launch-credentials span {
+  color: #9fb0c2;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.launch-credentials code {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 4px 6px;
+}
+
 #demo-frame {
   border: 0;
   height: calc(100vh - 66px);

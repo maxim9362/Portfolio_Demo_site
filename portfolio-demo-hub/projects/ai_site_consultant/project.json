@@ -49,6 +49,10 @@
   "video_url": "/project-assets/ai_site_consultant/video.mp4",
   "demo_path": "/demo/ai-site-consultant/",
   "admin_path": "/admin-demo/ai-site-consultant/",
+  "admin_demo_credentials": {
+    "username": "admin",
+    "password": "change_me"
+  },
   "has_demo": true,
   "has_admin_demo": true,
   "cta_text": "Запустить демо",

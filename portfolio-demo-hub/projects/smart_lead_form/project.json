@@ -46,6 +46,10 @@
   "video_url": "/project-assets/smart_lead_form/video.mp4",
   "demo_path": "/demo/smart-lead-form/",
   "admin_path": "/admin-demo/smart-lead-form/",
+  "admin_demo_credentials": {
+    "username": "admin",
+    "password": "admin123"
+  },
   "has_demo": true,
   "has_admin_demo": true,
   "cta_text": "Запустить демо",

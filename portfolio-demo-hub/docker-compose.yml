@@ -7,6 +7,7 @@ services:
       POSTGRES_PASSWORD: portfolio
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
     expose:
       - "5432"
     healthcheck:
@@ -28,21 +29,67 @@ services:
     expose:
       - "8000"
 
+  ai_site_consultant_postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ai_consultant
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ai_site_consultant_postgres_data:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ai_consultant"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
   ai_site_consultant:
     build:
       context: ./projects/ai_site_consultant
     env_file:
       - ./projects/ai_site_consultant/.env
+    environment:
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@ai_site_consultant_postgres:5432/ai_consultant
+      KNOWLEDGE_DIR: /app/knowledge
+      CHROMA_PATH: /app/chroma_data
+      ALLOWED_ORIGINS: http://localhost,http://localhost:80,http://localhost:8000,http://127.0.0.1:8000
+    depends_on:
+      ai_site_consultant_postgres:
+        condition: service_healthy
+    volumes:
+      - ai_site_consultant_chroma_data:/app/chroma_data
     expose:
       - "8000"
+
+  smart_lead_form_postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: smart_lead_form
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - smart_lead_form_postgres_data:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d smart_lead_form"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
   smart_lead_form:
     build:
       context: ./projects/smart_lead_form
     env_file:
       - ./projects/smart_lead_form/.env
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@smart_lead_form_postgres:5432/smart_lead_form
+      PUBLIC_BASE_URL: http://localhost/demo/smart-lead-form
+      ALLOWED_ORIGINS: http://localhost,http://localhost:80,http://localhost:8000,http://127.0.0.1:8000
     depends_on:
-      postgres:
+      smart_lead_form_postgres:
         condition: service_healthy
     expose:
       - "8000"
@@ -61,3 +108,6 @@ services:
 
 volumes:
   postgres_data:
+  ai_site_consultant_postgres_data:
+  ai_site_consultant_chroma_data:
+  smart_lead_form_postgres_data:
