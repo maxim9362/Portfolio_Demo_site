@@ -1,0 +1,7 @@
+portfolio-demo-hub/.env
+portfolio-demo-hub/.env.*
+!portfolio-demo-hub/.env.example
+**/__pycache__/
+*.py[cod]
+.venv/
+.idea/

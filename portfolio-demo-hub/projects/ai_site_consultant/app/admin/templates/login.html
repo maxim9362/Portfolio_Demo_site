@@ -1,0 +1,44 @@
+<!-- Этот шаблон отображает форму входа единственного администратора. -->
+{% extends "base.html" %}
+{% block title %}Вход{% endblock %}
+{% block navigation %}{% endblock %}
+{% block content %}
+<section class="auth-layout">
+    <form class="auth-panel" method="post" action="/admin/login" autocomplete="on">
+        <div class="auth-panel__heading">
+            <span class="eyebrow">Защищенный доступ</span>
+            <h1>Вход в админку</h1>
+            <p>Просмотр и обработка заявок с сайта.</p>
+        </div>
+
+        {% if error %}
+        <div class="notice notice--error" role="alert">{{ error }}</div>
+        {% endif %}
+
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <label class="field">
+            <span>Логин</span>
+            <input
+                name="username"
+                type="text"
+                value="{{ username or '' }}"
+                autocomplete="username"
+                required
+                autofocus
+            >
+        </label>
+        <label class="field">
+            <span>Пароль</span>
+            <input
+                name="password"
+                type="password"
+                autocomplete="current-password"
+                required
+            >
+        </label>
+        <button class="button button--primary button--wide" type="submit">
+            Войти
+        </button>
+    </form>
+</section>
+{% endblock %}

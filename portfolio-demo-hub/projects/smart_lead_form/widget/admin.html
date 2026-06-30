@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Smart Lead Form Admin</title>
+    <link rel="stylesheet" href="./admin.css?v=1">
+  </head>
+  <body>
+    <header class="admin-header">
+      <a class="admin-brand" href="./admin.html">
+        <span class="admin-brand__mark" aria-hidden="true">S</span>
+        <span>
+          <strong>Smart Lead Form</strong>
+          <small>Управление заявками</small>
+        </span>
+      </a>
+      <nav class="admin-nav" aria-label="Навигация админки" id="admin-navigation">
+        <a href="#leads">Заявки</a>
+        <a href="./index.html">Demo page</a>
+        <button id="admin-logout-button" class="admin-nav__logout is-hidden" type="button">Выйти</button>
+      </nav>
+    </header>
+
+    <main class="admin-main">
+      <section class="auth-layout" id="admin-login-panel">
+        <form class="auth-panel" autocomplete="on">
+          <div class="auth-panel__heading">
+            <span class="eyebrow">Защищенный доступ</span>
+            <h1>Вход в админку</h1>
+            <p>Просмотр, обработка и управление заявками с сайта.</p>
+          </div>
+
+          <label class="field">
+            <span>Логин</span>
+            <input id="admin-username" type="text" placeholder="admin" autocomplete="username">
+          </label>
+          <label class="field">
+            <span>Пароль</span>
+            <input id="admin-password" type="password" placeholder="admin123" autocomplete="current-password">
+          </label>
+          <button id="admin-login-button" class="button button--primary button--wide" type="button">Войти</button>
+        </form>
+      </section>
+
+      <div class="notice" id="admin-status" role="status">
+        Войдите в админку, чтобы увидеть заявки.
+      </div>
+
+      <section class="is-hidden" id="admin-content">
+        <section class="page-heading">
+          <div>
+            <span class="eyebrow">Рабочая очередь</span>
+            <h1>Заявки</h1>
+            <p>Новые обращения отображаются первыми.</p>
+          </div>
+          <div class="page-actions">
+            <button id="admin-load-button" class="button button--primary" type="button">Обновить список</button>
+          </div>
+        </section>
+
+        <section class="queue-toolbar" aria-label="Состояние очереди">
+          <div>
+            <span>Новых заявок</span>
+            <strong id="admin-total">0</strong>
+          </div>
+          <p>Вы вошли как <strong id="admin-current-user">—</strong></p>
+        </section>
+
+        <div id="admin-leads-list" class="table-shell"></div>
+        <div id="admin-detail-panel" class="admin-detail-target"></div>
+      </section>
+    </main>
+
+    <footer class="admin-footer">
+      <span>Smart Lead Form</span>
+      <span>Admin</span>
+    </footer>
+
+    <script>
+      window.SmartLeadAdminConfig = {
+        apiBaseUrl: "http://localhost:8000"
+      };
+    </script>
+    <script src="./admin.js?v=5"></script>
+  </body>
+</html>

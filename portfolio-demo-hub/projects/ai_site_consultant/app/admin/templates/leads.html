@@ -1,0 +1,127 @@
+<!-- Этот шаблон показывает таблицу заявок и управление уведомлениями. -->
+{% extends "base.html" %}
+{% block title %}Заявки{% endblock %}
+{% block content %}
+<section class="page-heading">
+    <div>
+        <span class="eyebrow">Рабочая очередь</span>
+        <h1>Заявки</h1>
+        <p>Новые обращения отображаются первыми.</p>
+    </div>
+    <div class="page-actions">
+        <button
+            class="button button--secondary"
+            id="enable-notifications"
+            type="button"
+        >
+            Включить уведомления
+        </button>
+        <button
+            class="button button--primary is-hidden"
+            id="refresh-leads"
+            type="button"
+        >
+            Обновить список
+        </button>
+    </div>
+</section>
+
+<section class="queue-toolbar" aria-label="Состояние очереди">
+    <div>
+        <span>Новых заявок</span>
+        <strong id="new-count">{{ new_count }}</strong>
+    </div>
+    <p id="notification-status" aria-live="polite"></p>
+</section>
+
+{% if leads %}
+<div class="table-shell">
+    <table class="leads-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Дата</th>
+                <th>Клиент</th>
+                <th>Город</th>
+                <th>Услуга и проблема</th>
+                <th>Время связи</th>
+                <th>Статус</th>
+                <th><span class="sr-only">Действия</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for lead in leads %}
+            <tr>
+                <td data-label="ID">#{{ lead.id }}</td>
+                <td data-label="Дата">{{ lead.created_at_text }}</td>
+                <td data-label="Клиент">
+                    <strong>{{ lead.name }}</strong>
+                    <span class="table-muted">{{ lead.phone }}</span>
+                    {% if lead.email != "Не указан" %}
+                    <span class="table-muted">{{ lead.email }}</span>
+                    {% endif %}
+                </td>
+                <td data-label="Город">{{ lead.city }}</td>
+                <td data-label="Обращение">
+                    <strong>{{ lead.service }}</strong>
+                    <span class="table-muted table-muted--wrap">
+                        {{ lead.problem }}
+                    </span>
+                </td>
+                <td data-label="Время">{{ lead.preferred_contact_time }}</td>
+                <td data-label="Статус">
+                    <span class="status status--{{ lead.status }}">
+                        {{ lead.status_label }}
+                    </span>
+                </td>
+                <td data-label="Действия">
+                    <div class="row-actions">
+                        <a class="icon-link" href="/admin/leads/{{ lead.id }}">
+                            Открыть
+                        </a>
+                        {% if lead.tel_href %}
+                        <a class="icon-link" href="{{ lead.tel_href }}">
+                            Позвонить
+                        </a>
+                        {% endif %}
+                        {% if lead.whatsapp_href %}
+                        <a
+                            class="icon-link"
+                            href="{{ lead.whatsapp_href }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            WhatsApp
+                        </a>
+                        {% endif %}
+                        <form
+                            method="post"
+                            action="/admin/leads/{{ lead.id }}/delete"
+                            data-confirm-delete
+                        >
+                            <input
+                                type="hidden"
+                                name="csrf_token"
+                                value="{{ csrf_token }}"
+                            >
+                            <button class="icon-link icon-link--danger" type="submit">
+                                Удалить
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<section class="empty-state">
+    <h2>Заявок пока нет</h2>
+    <p>Новые обращения из чата появятся здесь автоматически.</p>
+</section>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script src="/static/admin.js?v=1" defer></script>
+{% endblock %}
