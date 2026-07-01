@@ -23,9 +23,9 @@
     <div class="contact-direct">
       <p class="eyebrow">Или напишите напрямую</p>
       <div class="contact-channels">
-        <a class="button small" href="{{ contact.whatsapp_url }}" target="_blank" rel="noopener">WhatsApp</a>
-        <a class="button small" href="{{ contact.email_url }}">Email</a>
-        <a class="button small" href="{{ contact.telegram_url }}" target="_blank" rel="noopener">Telegram</a>
+        <a class="button small" href="{{ contact.whatsapp_url }}" target="_blank" rel="noopener">WhatsApp {{ contact.whatsapp_label }}</a>
+        <a class="button small" href="{{ contact.email_url }}">{{ contact.email }}</a>
+        <a class="button small" href="{{ contact.telegram_url }}" target="_blank" rel="noopener">Telegram {{ contact.telegram_label }}</a>
         <a class="text-link" href="{{ contact.facebook_url }}" target="_blank" rel="noopener">Facebook</a>
       </div>
     </div>
