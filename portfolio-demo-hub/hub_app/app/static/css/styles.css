@@ -1068,6 +1068,34 @@ th {
   margin: 10px 0 0;
 }
 
+.faq-list {
+  display: grid;
+  gap: 10px;
+}
+
+.faq-list details {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 10px 28px rgba(31, 48, 69, 0.06);
+  padding: 16px 18px;
+}
+
+.faq-list summary {
+  color: var(--ink);
+  cursor: pointer;
+  font-weight: 850;
+}
+
+.faq-list summary::marker {
+  color: var(--primary);
+}
+
+.faq-list p {
+  color: var(--muted);
+  margin: 10px 0 0;
+}
+
 @media (max-width: 900px) {
   .home-hero,
   .project-hero,
