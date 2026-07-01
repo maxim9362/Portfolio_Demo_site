@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     )
     admin_username: str = Field("admin", alias="ADMIN_USERNAME")
     admin_password: str = Field("change_me", alias="ADMIN_PASSWORD")
+    app_env: str = Field("development", alias="APP_ENV")
     projects_root: Path = Field(Path("/projects"), alias="PROJECTS_ROOT")
     demo_internal_base_url: str = Field("http://nginx", alias="DEMO_INTERNAL_BASE_URL")
 

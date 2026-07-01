@@ -1,16 +1,18 @@
-<article class="project-card">
-  <div class="project-preview-wrap">
-    {% if project.preview_image %}
-      <img class="project-preview" src="{{ project.preview_image }}" alt="{{ project.title }}" onerror="this.hidden=true; this.nextElementSibling.hidden=false;">
-      <div class="project-preview placeholder" hidden>
-        <span>{{ project.short_title }}</span>
-      </div>
-    {% else %}
-      <div class="project-preview placeholder">
-        <span>{{ project.short_title }}</span>
-      </div>
-    {% endif %}
-  </div>
+<article class="project-card{% if hide_project_media %} project-card-no-media{% endif %}">
+  {% if not hide_project_media %}
+    <div class="project-preview-wrap">
+      {% if project.preview_image %}
+        <img class="project-preview" src="{{ project.preview_image }}" alt="{{ project.title }}" onerror="this.hidden=true; this.nextElementSibling.hidden=false;">
+        <div class="project-preview placeholder" hidden>
+          <span>{{ project.short_title }}</span>
+        </div>
+      {% else %}
+        <div class="project-preview placeholder">
+          <span>{{ project.short_title }}</span>
+        </div>
+      {% endif %}
+    </div>
+  {% endif %}
   <div class="card-top">
     <span class="badge soft">{{ project.category }}</span>
     <strong class="status-badge">{{ project.status }}</strong>

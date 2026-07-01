@@ -28,8 +28,10 @@ def load_projects() -> list[dict[str, Any]]:
             if not data.get("is_active", False):
                 continue
             data.setdefault("folder", project_dir.name)
+            if _is_placeholder_preview(project_dir, data.get("preview_image")):
+                data["preview_image"] = None
             projects.append(data)
-        except Exception:
+        except (json.JSONDecodeError, OSError, UnicodeDecodeError):
             logger.exception("Could not load project config: %s", project_file)
 
     return sorted(projects, key=lambda item: item.get("order", 9999))
@@ -40,3 +42,13 @@ def get_project(project_id: str) -> dict[str, Any] | None:
         if project.get("id") == project_id:
             return project
     return None
+
+
+def _is_placeholder_preview(project_dir: Path, preview_image: Any) -> bool:
+    if not isinstance(preview_image, str) or not preview_image:
+        return False
+    preview_path = project_dir / Path(preview_image).name
+    try:
+        return preview_path.exists() and preview_path.stat().st_size < 512
+    except OSError:
+        return False

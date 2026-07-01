@@ -1,20 +1,23 @@
+import re
 from typing import Any
 from urllib.error import HTTPError, URLError
+from urllib.parse import quote, urlparse
 from urllib.request import Request as UrlRequest
 from urllib.request import urlopen
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Request
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy.orm import Session
 
+from app.config import get_settings
 from app.db.database import get_db
 from app.db.models import ContactLead, DemoSession
-from app.config import get_settings
-from app.services.analytics import finish_demo_session, record_event
+from app.services.analytics import KNOWN_EVENTS, finish_demo_session, record_event
 from app.services.project_loader import get_project
 
 router = APIRouter(prefix="/api")
+DEMO_SESSION_ID_RE = re.compile(r"^demo_[0-9a-f]{32}$")
 
 
 class ContactPayload(BaseModel):
@@ -35,6 +38,13 @@ class AnalyticsPayload(BaseModel):
     project_id: str | None = None
     page_url: str | None = None
     metadata: dict[str, Any] | None = None
+
+    @field_validator("event_type")
+    @classmethod
+    def validate_event_type(cls, value: str) -> str:
+        if value not in KNOWN_EVENTS:
+            raise ValueError("Unknown analytics event type")
+        return value
 
 
 class HeartbeatPayload(BaseModel):
@@ -177,6 +187,8 @@ def demo_finish(
 def _cleanup_demo_project(project_id: str | None, demo_session_id: str) -> bool:
     if not project_id:
         return False
+    if not DEMO_SESSION_ID_RE.fullmatch(demo_session_id):
+        return False
 
     project = get_project(project_id)
     if not project:
@@ -187,9 +199,12 @@ def _cleanup_demo_project(project_id: str | None, demo_session_id: str) -> bool:
         demo_path = str(project.get("demo_path", ""))
         cleanup_path = f"{demo_path.rstrip('/')}/demo-session/{{demo_session_id}}"
 
-    cleanup_url = cleanup_path.replace("{demo_session_id}", demo_session_id)
+    cleanup_url = cleanup_path.replace("{demo_session_id}", quote(demo_session_id, safe=""))
+    base_url = get_settings().demo_internal_base_url.rstrip("/")
     if cleanup_url.startswith("/"):
-        cleanup_url = f"{get_settings().demo_internal_base_url.rstrip('/')}{cleanup_url}"
+        cleanup_url = f"{base_url}{cleanup_url}"
+    elif not _is_allowed_cleanup_url(cleanup_url, base_url):
+        return False
 
     try:
         request = UrlRequest(cleanup_url, method="DELETE")
@@ -197,3 +212,13 @@ def _cleanup_demo_project(project_id: str | None, demo_session_id: str) -> bool:
             return 200 <= response.status < 300
     except (HTTPError, URLError, TimeoutError, ValueError):
         return False
+
+
+def _is_allowed_cleanup_url(cleanup_url: str, base_url: str) -> bool:
+    cleanup_parts = urlparse(cleanup_url)
+    if not cleanup_parts.scheme and not cleanup_parts.netloc:
+        return cleanup_url.startswith("/")
+    if cleanup_parts.scheme not in {"http", "https"}:
+        return False
+    base_parts = urlparse(base_url)
+    return cleanup_parts.scheme == base_parts.scheme and cleanup_parts.netloc == base_parts.netloc

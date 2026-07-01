@@ -144,27 +144,25 @@ def leads(
 
 @router.post("/leads/{lead_id}/viewed")
 def lead_viewed(lead_id: int, request: Request, _: str = Depends(require_admin), db: Session = Depends(get_db)) -> RedirectResponse:
-    lead = db.get(ContactLead, lead_id)
-    if lead:
-        lead.status = "viewed"
-        db.commit()
-    return RedirectResponse(referer_or("/admin/leads", request), status_code=303)
+    return update_lead_status(lead_id, "viewed", request, db)
 
 
 @router.post("/leads/{lead_id}/archive")
 def lead_archive(lead_id: int, request: Request, _: str = Depends(require_admin), db: Session = Depends(get_db)) -> RedirectResponse:
-    lead = db.get(ContactLead, lead_id)
-    if lead:
-        lead.status = "archived"
-        db.commit()
-    return RedirectResponse(referer_or("/admin/leads", request), status_code=303)
+    return update_lead_status(lead_id, "archived", request, db)
 
 
 @router.post("/leads/{lead_id}/restore")
 def lead_restore(lead_id: int, request: Request, _: str = Depends(require_admin), db: Session = Depends(get_db)) -> RedirectResponse:
+    return update_lead_status(lead_id, "new", request, db)
+
+
+def update_lead_status(lead_id: int, new_status: str, request: Request, db: Session) -> RedirectResponse:
+    if new_status not in {"new", "viewed", "archived"}:
+        raise HTTPException(status_code=400, detail="Invalid lead status")
     lead = db.get(ContactLead, lead_id)
     if lead:
-        lead.status = "new"
+        lead.status = new_status
         db.commit()
     return RedirectResponse(referer_or("/admin/leads", request), status_code=303)
 
@@ -172,26 +170,44 @@ def lead_restore(lead_id: int, request: Request, _: str = Depends(require_admin)
 @router.get("/sessions", response_class=HTMLResponse)
 def sessions(request: Request, _: str = Depends(require_admin), db: Session = Depends(get_db)) -> HTMLResponse:
     items = db.query(VisitorSession).order_by(VisitorSession.last_seen_at.desc().nullslast()).limit(300).all()
+    session_ids = [item.session_id for item in items]
+    event_counts = dict(
+        db.query(AnalyticsEvent.session_id, func.count(AnalyticsEvent.id))
+        .filter(AnalyticsEvent.session_id.in_(session_ids))
+        .group_by(AnalyticsEvent.session_id)
+        .all()
+    )
+    viewed_projects = dict(
+        db.query(AnalyticsEvent.session_id, func.count(distinct(AnalyticsEvent.project_id)))
+        .filter(AnalyticsEvent.session_id.in_(session_ids))
+        .filter(AnalyticsEvent.event_type == "project_view")
+        .filter(AnalyticsEvent.project_id.isnot(None))
+        .group_by(AnalyticsEvent.session_id)
+        .all()
+    )
+    demo_counts = dict(
+        db.query(DemoSession.session_id, func.count(DemoSession.id))
+        .filter(DemoSession.session_id.in_(session_ids))
+        .group_by(DemoSession.session_id)
+        .all()
+    )
+    lead_session_ids = {
+        row[0]
+        for row in db.query(ContactLead.session_id)
+        .filter(ContactLead.session_id.in_(session_ids))
+        .filter(ContactLead.session_id.isnot(None))
+        .distinct()
+        .all()
+    }
     rows = []
     for item in items:
-        event_count = db.query(AnalyticsEvent).filter(AnalyticsEvent.session_id == item.session_id).count()
-        viewed_projects = (
-            db.query(func.count(distinct(AnalyticsEvent.project_id)))
-            .filter(AnalyticsEvent.session_id == item.session_id)
-            .filter(AnalyticsEvent.event_type == "project_view")
-            .filter(AnalyticsEvent.project_id.isnot(None))
-            .scalar()
-            or 0
-        )
-        demo_count = db.query(DemoSession).filter(DemoSession.session_id == item.session_id).count()
-        has_lead = db.query(ContactLead).filter(ContactLead.session_id == item.session_id).first() is not None
         rows.append(
             {
                 "item": item,
-                "event_count": event_count,
-                "viewed_projects": viewed_projects,
-                "demo_count": demo_count,
-                "has_lead": has_lead,
+                "event_count": event_counts.get(item.session_id, 0),
+                "viewed_projects": viewed_projects.get(item.session_id, 0),
+                "demo_count": demo_counts.get(item.session_id, 0),
+                "has_lead": item.session_id in lead_session_ids,
                 "duration": duration(item.duration_seconds),
             }
         )

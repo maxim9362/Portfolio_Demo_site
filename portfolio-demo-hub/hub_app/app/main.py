@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from app.config import get_settings
 from app.db import models  # noqa: F401
 from app.db.database import Base, engine
 from app.routes import admin, api, pages
@@ -20,6 +21,10 @@ templates = Jinja2Templates(directory="app/templates")
 
 @app.on_event("startup")
 def on_startup() -> None:
+    settings = get_settings()
+    if settings.app_env.lower() == "production" and settings.admin_password == "change_me":
+        raise RuntimeError("ADMIN_PASSWORD must be changed in production")
+
     Base.metadata.create_all(bind=engine)
     logger.info(
         "\n"
@@ -33,9 +38,11 @@ def on_startup() -> None:
         "http://localhost/admin\n"
         "\n"
         "Admin Basic Auth:\n"
-        "username: admin\n"
-        "password: change_me\n"
+        "username: %s\n"
+        "password: configured via ADMIN_PASSWORD\n"
         "============================================================"
+        "\n",
+        settings.admin_username,
     )
 
 

@@ -40,11 +40,11 @@
   {% if project.video_url %}
     <div class="media-placeholder video-frame">
       {% if project.video_url.endswith(".mp4") %}
-        <video controls preload="metadata" poster="{{ project.preview_image }}">
+        <video controls autoplay muted playsinline preload="metadata"{% if project.preview_image %} poster="{{ project.preview_image }}"{% endif %}>
           <source src="{{ project.video_url }}" type="video/mp4">
         </video>
       {% else %}
-        <iframe title="{{ project.title }} video" src="{{ project.video_url }}" allowfullscreen></iframe>
+        <iframe title="{{ project.title }} video" src="{{ project.video_url }}" allow="autoplay; fullscreen" allowfullscreen></iframe>
       {% endif %}
     </div>
   {% else %}
