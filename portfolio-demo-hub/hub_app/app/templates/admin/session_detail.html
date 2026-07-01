@@ -1,0 +1,95 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Сессия{% endblock %}
+{% block content %}
+<div class="admin-title">
+  <div>
+    <p class="eyebrow">Путь пользователя</p>
+    <h1>{{ session.session_id }}</h1>
+  </div>
+  <a class="button small" href="/admin/sessions">Все сессии</a>
+</div>
+
+<div class="metric-grid">
+  <div><span>Начало</span><strong>{{ session.started_at }}</strong></div>
+  <div><span>Последняя активность</span><strong>{{ session.last_seen_at or "" }}</strong></div>
+  <div><span>Конец</span><strong>{{ session.ended_at or "" }}</strong></div>
+  <div><span>Длительность</span><strong>{{ duration }}</strong></div>
+</div>
+
+<section class="admin-section detail-grid-admin">
+  <div>
+    <h2>Просмотренные страницы</h2>
+    <div class="list-panel">
+      {% for event in pages %}
+      <div><strong>{{ event.created_at }}</strong><span>{{ event.page_url }}</span></div>
+      {% else %}<p>Страниц пока нет.</p>{% endfor %}
+    </div>
+  </div>
+  <div>
+    <h2>Просмотренные проекты</h2>
+    <div class="list-panel">
+      {% for event in projects %}
+      <div><strong>{{ event.created_at }}</strong><span>{{ event.project_id }}</span></div>
+      {% else %}<p>Проектов пока нет.</p>{% endfor %}
+    </div>
+  </div>
+  <div>
+    <h2>Запущенные демо</h2>
+    <div class="list-panel">
+      {% for demo in demos %}
+      <div><strong>{{ demo.project_id }}</strong><a href="/admin/demo-sessions/{{ demo.demo_session_id }}">{{ demo.demo_session_id }}</a></div>
+      {% else %}<p>Демо пока нет.</p>{% endfor %}
+    </div>
+  </div>
+  <div>
+    <h2>Переходы в demo admin</h2>
+    <div class="list-panel">
+      {% for event in admin_opens %}
+      <div><strong>{{ event.created_at }}</strong><span>{{ event.project_id }}</span></div>
+      {% else %}<p>Переходов пока нет.</p>{% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="admin-section">
+  <h2>Заявки этой сессии</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Дата</th><th>Имя</th><th>Телефон</th><th>Email</th><th>Проект</th><th>Сообщение</th><th>Статус</th></tr></thead>
+      <tbody>
+        {% for lead in leads %}
+        <tr>
+          <td>{{ lead.created_at }}</td>
+          <td>{{ lead.name }}</td>
+          <td>{{ lead.phone or "" }}</td>
+          <td>{{ lead.email or "" }}</td>
+          <td>{{ lead.project_id or "" }}</td>
+          <td>{{ lead.message or "" }}</td>
+          <td>{{ lead.status }}</td>
+        </tr>
+        {% else %}<tr><td colspan="7">Заявок пока нет.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="admin-section">
+  <h2>Хронология событий</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Время</th><th>Событие</th><th>Проект</th><th>Страница</th><th>Demo Session ID</th></tr></thead>
+      <tbody>
+        {% for event in events %}
+        <tr>
+          <td>{{ event.created_at }}</td>
+          <td><span class="status-pill">{{ event.event_type }}</span></td>
+          <td>{{ event.project_id or "" }}</td>
+          <td class="cell-url">{{ event.page_url or "" }}</td>
+          <td>{% if event.demo_session_id %}<a href="/admin/demo-sessions/{{ event.demo_session_id }}">{{ event.demo_session_id }}</a>{% endif %}</td>
+        </tr>
+        {% else %}<tr><td colspan="5">Событий пока нет.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

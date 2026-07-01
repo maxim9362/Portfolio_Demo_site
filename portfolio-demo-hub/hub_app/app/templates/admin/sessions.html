@@ -1,0 +1,43 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Сессии{% endblock %}
+{% block content %}
+<div class="admin-title">
+  <div>
+    <p class="eyebrow">Путь пользователя</p>
+    <h1>Сессии</h1>
+  </div>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Session ID</th>
+        <th>Начало</th>
+        <th>Последняя активность</th>
+        <th>Длительность</th>
+        <th>Событий</th>
+        <th>Проектов</th>
+        <th>Демо</th>
+        <th>Заявка</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in sessions %}
+      <tr>
+        <td><a href="/admin/sessions/{{ row.item.session_id }}">{{ row.item.session_id }}</a></td>
+        <td>{{ row.item.started_at }}</td>
+        <td>{{ row.item.last_seen_at or "" }}</td>
+        <td>{{ row.duration }}</td>
+        <td>{{ row.event_count }}</td>
+        <td>{{ row.viewed_projects }}</td>
+        <td>{{ row.demo_count }}</td>
+        <td>{{ "да" if row.has_lead else "нет" }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="8">Сессий пока нет.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

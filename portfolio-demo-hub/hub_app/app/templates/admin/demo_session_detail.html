@@ -1,0 +1,42 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Demo session{% endblock %}
+{% block content %}
+<div class="admin-title">
+  <div>
+    <p class="eyebrow">Demo session</p>
+    <h1>{{ item.demo_session_id }}</h1>
+  </div>
+  <a class="button small" href="/admin/demo-sessions">Все demo sessions</a>
+</div>
+
+<div class="metric-grid">
+  <div><span>Project ID</span><strong>{{ item.project_id }}</strong></div>
+  <div><span>Session ID</span><strong>{% if item.session_id %}<a href="/admin/sessions/{{ item.session_id }}">{{ item.session_id }}</a>{% endif %}</strong></div>
+  <div><span>Started at</span><strong>{{ item.started_at }}</strong></div>
+  <div><span>Ended at</span><strong>{{ item.ended_at or "" }}</strong></div>
+  <div><span>Duration</span><strong>{{ duration }}</strong></div>
+  <div><span>Opened demo</span><strong>{{ "да" if item.opened_demo else "нет" }}</strong></div>
+  <div><span>Opened admin</span><strong>{{ "да" if item.opened_admin else "нет" }}</strong></div>
+  <div><span>Status</span><strong>{{ item.status }}</strong></div>
+</div>
+
+<section class="admin-section">
+  <h2>Events этой demo session</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Дата</th><th>Событие</th><th>Проект</th><th>Страница</th><th>Session ID</th></tr></thead>
+      <tbody>
+        {% for event in events %}
+        <tr>
+          <td>{{ event.created_at }}</td>
+          <td><span class="status-pill">{{ event.event_type }}</span></td>
+          <td>{{ event.project_id or "" }}</td>
+          <td class="cell-url">{{ event.page_url or "" }}</td>
+          <td>{% if event.session_id %}<a href="/admin/sessions/{{ event.session_id }}">{{ event.session_id }}</a>{% endif %}</td>
+        </tr>
+        {% else %}<tr><td colspan="5">Событий пока нет.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
