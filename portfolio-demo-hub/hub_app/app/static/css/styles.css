@@ -582,12 +582,49 @@ button.danger {
   margin-top: 26px;
 }
 
+.contact-profile {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.contact-profile h1 {
+  margin-bottom: 0;
+}
+
+.contact-photo {
+  aspect-ratio: 1;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  object-fit: cover;
+  width: clamp(82px, 12vw, 112px);
+}
+
 .contact-points span {
   background: #fff;
   border: 1px solid var(--line);
   border-radius: 8px;
   font-weight: 800;
   padding: 12px 14px;
+}
+
+.contact-direct {
+  margin-top: 24px;
+}
+
+.contact-channels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.contact-channels .text-link {
+  align-items: center;
+  display: inline-flex;
+  min-height: 36px;
 }
 
 .contact-form {

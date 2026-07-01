@@ -6,13 +6,28 @@
 {% block content %}
 <section class="form-shell contact-shell">
   <div class="contact-copy">
+    <div class="contact-profile">
+      <img class="contact-photo" src="{{ contact.photo_url }}" alt="Maxim" loading="lazy" decoding="async">
+      <div>
+        <p class="eyebrow">Maxim AI Automation</p>
+        <h1>Обсудить проект</h1>
+      </div>
+    </div>
     <p class="eyebrow">Заявка</p>
-    <h1>Обсудить проект</h1>
     <p class="lead">Оставьте контакт, и я свяжусь с вами. Можно обсудить AI-чат, WhatsApp-бота, умную форму заявок или demo/admin часть для клиента.</p>
     <div class="contact-points">
       <span>Без email-рассылок</span>
       <span>Заявка сохраняется в админке</span>
       <span>Можно указать конкретный проект</span>
+    </div>
+    <div class="contact-direct">
+      <p class="eyebrow">Или напишите напрямую</p>
+      <div class="contact-channels">
+        <a class="button small" href="{{ contact.whatsapp_url }}" target="_blank" rel="noopener">WhatsApp</a>
+        <a class="button small" href="{{ contact.email_url }}">Email</a>
+        <a class="button small" href="{{ contact.telegram_url }}" target="_blank" rel="noopener">Telegram</a>
+        <a class="text-link" href="{{ contact.facebook_url }}" target="_blank" rel="noopener">Facebook</a>
+      </div>
     </div>
   </div>
   <form class="contact-form" id="contact-form">

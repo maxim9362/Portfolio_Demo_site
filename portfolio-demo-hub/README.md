@@ -70,6 +70,11 @@ APP_HOST=0.0.0.0
 APP_PORT=8000
 SITE_NAME=Maxim AI Automation
 SITE_URL=https://your-domain.com
+CONTACT_TELEGRAM=your_telegram
+CONTACT_EMAIL=you@example.com
+CONTACT_WHATSAPP=972503213621
+CONTACT_FACEBOOK=https://www.facebook.com/profile.php?id=61584187357263&locale=ru_RU
+CONTACT_PHOTO_URL=/static/img/maxim-profile.jpg
 ```
 
 Реальные `.env` не должны попадать в git. В репозитории хранятся только `.env.example`.
