@@ -2,7 +2,7 @@
   {% if not hide_project_media %}
     <div class="project-preview-wrap">
       {% if project.preview_image %}
-        <img class="project-preview" src="{{ project.preview_image }}" alt="{{ project.title }}" onerror="this.hidden=true; this.nextElementSibling.hidden=false;">
+        <img class="project-preview" src="{{ project.preview_image }}" alt="{{ project.title }}" loading="lazy" decoding="async" onerror="this.hidden=true; this.nextElementSibling.hidden=false;">
         <div class="project-preview placeholder" hidden>
           <span>{{ project.short_title }}</span>
         </div>

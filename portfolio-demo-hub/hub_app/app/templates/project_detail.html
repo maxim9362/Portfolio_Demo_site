@@ -1,9 +1,8 @@
 {% extends "base.html" %}
-{% block title %}{{ project.title }} — Portfolio Demo Hub{% endblock %}
-{% block meta_description %}{{ project.short_description }}{% endblock %}
-{% block og_title %}{{ project.title }} — Portfolio Demo Hub{% endblock %}
-{% block og_description %}{{ project.short_description }}{% endblock %}
-{% block og_image %}{{ project.preview_image or "/project-assets/ai_site_consultant/preview.png" }}{% endblock %}
+{% block title %}{{ project.title }} — Maxim AI Automation{% endblock %}
+{% block meta_description %}{{ meta_description }}{% endblock %}
+{% block og_title %}{{ project.title }} — Maxim AI Automation{% endblock %}
+{% block og_description %}{{ meta_description }}{% endblock %}
 {% block content %}
 <section class="project-hero">
   <div>
@@ -24,7 +23,7 @@
   </div>
   <div class="project-hero-media-wrap">
     {% if project.preview_image %}
-      <img class="project-hero-media" src="{{ project.preview_image }}" alt="{{ project.title }}" onerror="this.hidden=true; this.nextElementSibling.hidden=false;">
+      <img class="project-hero-media" src="{{ project.preview_image }}" alt="{{ project.title }}" loading="lazy" decoding="async" onerror="this.hidden=true; this.nextElementSibling.hidden=false;">
       <div class="project-hero-media placeholder" hidden>
         <span>{{ project.short_title }}</span>
       </div>
@@ -122,7 +121,7 @@
   </div>
   <div class="screenshot-grid">
     {% for screenshot in project.screenshots %}
-      <img src="{{ screenshot }}" alt="{{ project.title }} screenshot {{ loop.index }}">
+      <img src="{{ screenshot }}" alt="{{ project.title }} screenshot {{ loop.index }}" loading="lazy" decoding="async">
     {% endfor %}
   </div>
 </section>

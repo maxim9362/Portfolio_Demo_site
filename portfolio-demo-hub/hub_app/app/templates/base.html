@@ -3,13 +3,27 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}AI-автоматизация для бизнеса — Maxim AI Automation{% endblock %}</title>
-  <meta name="description" content="{% block meta_description %}AI-консультанты, умные формы заявок, WhatsApp-боты и automation-решения для малого бизнеса.{% endblock %}">
-  <meta property="og:title" content="{% block og_title %}AI-автоматизация для бизнеса — Maxim AI Automation{% endblock %}">
-  <meta property="og:description" content="{% block og_description %}AI-консультанты, умные формы заявок, WhatsApp-боты и automation-решения для малого бизнеса.{% endblock %}">
-  <meta property="og:image" content="{% block og_image %}/project-assets/ai_site_consultant/preview.png{% endblock %}">
+  <title>{% block title %}AI-автоматизация бизнеса — Maxim AI Automation{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}AI-консультанты, WhatsApp-боты, умные формы заявок и demo admin для бизнеса.{% endblock %}">
+  {% if canonical_url %}
+  <link rel="canonical" href="{{ canonical_url }}">
+  {% endif %}
+  <meta property="og:title" content="{% block og_title %}AI-автоматизация бизнеса — Maxim AI Automation{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}AI-консультанты, WhatsApp-боты, умные формы заявок и demo admin для бизнеса.{% endblock %}">
   <meta property="og:type" content="website">
+  {% if canonical_url %}
+  <meta property="og:url" content="{{ canonical_url }}">
+  {% endif %}
+  {% if og_image %}
+  <meta property="og:image" content="{{ og_image }}">
+  {% endif %}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/css/styles.css">
+  {% if schema_data %}
+  <script type="application/ld+json">{{ schema_data | tojson }}</script>
+  {% endif %}
   {% block head %}{% endblock %}
 </head>
 <body data-project-id="{{ project.id if project is defined else '' }}">
@@ -20,9 +34,9 @@
     </a>
     <nav class="main-nav" aria-label="Основная навигация">
       <a href="/">Главная</a>
-      <a href="/projects">Проекты</a>
-      <a href="/for-partners">Для партнеров</a>
-      <a href="/contact" data-track-event="contact_button_click">Связаться</a>
+      <a href="/projects">Продукты</a>
+      <a href="/for-partners">Партнёрам</a>
+      <a class="nav-cta" href="/contact" data-track-event="contact_button_click">Связаться</a>
     </nav>
   </header>
   <main class="page">
@@ -31,6 +45,7 @@
   <script src="/static/js/analytics.js"></script>
   <script src="/static/js/reveal.js"></script>
   <script src="/static/js/typing.js"></script>
+  <script src="/static/js/premium.js"></script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

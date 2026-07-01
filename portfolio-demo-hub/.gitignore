@@ -11,6 +11,7 @@ __pycache__/
 .ruff_cache/
 .venv/
 .idea/
+.vscode/
 *.log
 .DS_Store
 *.sqlite3
