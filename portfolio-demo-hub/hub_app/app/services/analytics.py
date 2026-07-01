@@ -20,6 +20,10 @@ KNOWN_EVENTS = {
     "demo_finish",
     "heartbeat",
     "session_end",
+    "cta_click",
+    "project_demo_button_click",
+    "contact_button_click",
+    "partner_page_view",
 }
 
 
@@ -59,18 +63,27 @@ def record_event(
     metadata: dict[str, Any] | None = None,
     request: Request | None = None,
 ) -> AnalyticsEvent:
+    timestamp = now_utc()
     if session_id:
         visitor = get_or_create_visitor_session(db, session_id, request)
-        visitor.last_seen_at = now_utc()
+        visitor.last_seen_at = timestamp
+        if visitor.started_at:
+            visitor.duration_seconds = max(
+                0,
+                int((visitor.last_seen_at - visitor.started_at).total_seconds()),
+            )
         if event_type == "session_end":
-            visitor.ended_at = now_utc()
+            visitor.ended_at = timestamp
             if visitor.started_at:
-                visitor.duration_seconds = int((visitor.ended_at - visitor.started_at).total_seconds())
+                visitor.duration_seconds = max(
+                    0,
+                    int((visitor.ended_at - visitor.started_at).total_seconds()),
+                )
 
     if demo_session_id:
         demo = db.query(DemoSession).filter(DemoSession.demo_session_id == demo_session_id).one_or_none()
         if demo:
-            demo.last_seen_at = now_utc()
+            demo.last_seen_at = timestamp
             if event_type == "demo_tab_open":
                 demo.opened_demo = True
             if event_type == "admin_tab_open":

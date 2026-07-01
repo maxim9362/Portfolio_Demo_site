@@ -6,10 +6,12 @@
   var widgetConfig = window.SmartLeadFormConfig || {};
   var apiBaseUrl = widgetConfig.apiBaseUrl || "http://localhost:8000";
   var clientId = widgetConfig.clientId || "notary_demo";
+  var pageParams = new URLSearchParams(window.location.search);
+  var demoSessionId = pageParams.get("demo_session_id") || "";
   var mode = widgetConfig.mode || "floating";
   var containerId = widgetConfig.containerId || "smart-lead-form";
   var isEmbedded = mode === "embedded";
-  var existingLeadStorageKey = "smartLeadForm:" + clientId + ":lead";
+  var existingLeadStorageKey = "smartLeadForm:" + clientId + ":" + (demoSessionId || "default") + ":lead";
   var oneDayMs = 24 * 60 * 60 * 1000;
 
   var state = {
@@ -499,6 +501,7 @@
       body: JSON.stringify({
         client_id: clientId,
         scenario_key: state.config.scenario_key,
+        demo_session_id: demoSessionId || null,
         service_type: state.answers.service_type || null,
         language_pair: state.answers.language_pair || null,
         page_count: state.answers.page_count || null,

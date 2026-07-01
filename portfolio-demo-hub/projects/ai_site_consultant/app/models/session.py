@@ -19,6 +19,11 @@ class Session(Base):
         index=True,
         nullable=False,
     )
+    demo_session_id: Mapped[str | None] = mapped_column(
+        String(128),
+        index=True,
+        nullable=True,
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),

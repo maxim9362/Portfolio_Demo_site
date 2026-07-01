@@ -5,7 +5,9 @@
 
   var config = window.SmartLeadAdminConfig || {};
   var apiBaseUrl = config.apiBaseUrl || "http://localhost:8000";
-  var sessionStorageKey = "smartLeadAdminSession";
+  var pageParams = new URLSearchParams(window.location.search);
+  var demoSessionId = pageParams.get("demo_session_id") || "";
+  var sessionStorageKey = "smartLeadAdminSession:" + (demoSessionId || "default");
   var statusLabels = {
     new: "Новая",
     in_progress: "В работе",
@@ -105,6 +107,13 @@
 
   function apiUrl(path) {
     return apiBaseUrl.replace(/\/$/, "") + path;
+  }
+
+  function scopedApiPath(path) {
+    if (!demoSessionId) {
+      return path;
+    }
+    return path + (path.indexOf("?") >= 0 ? "&" : "?") + "demo_session_id=" + encodeURIComponent(demoSessionId);
   }
 
   function authHeaders() {
@@ -466,7 +475,12 @@
     elements.loadButton.disabled = true;
     setStatus("Загружаем заявки...", "loading");
 
-    requestJson("/api/leads?client_id=" + encodeURIComponent(state.clientId) + "&limit=100", {
+    var path = "/api/leads?client_id=" + encodeURIComponent(state.clientId) + "&limit=100";
+    if (demoSessionId) {
+      path += "&demo_session_id=" + encodeURIComponent(demoSessionId);
+    }
+
+    requestJson(path, {
       headers: authHeaders()
     })
       .then(function (data) {
@@ -545,7 +559,7 @@
   function updateLeadStatus(lead, statusValue) {
     setStatus("Сохраняем статус...", "loading");
 
-    requestJson("/api/leads/" + encodeURIComponent(lead.id) + "/status", {
+    requestJson(scopedApiPath("/api/leads/" + encodeURIComponent(lead.id) + "/status"), {
       method: "PATCH",
       headers: Object.assign({
         "Content-Type": "application/json"
@@ -575,7 +589,7 @@
 
     setStatus("Удаляем заявку...", "loading");
 
-    requestJson("/api/leads/" + encodeURIComponent(lead.id), {
+    requestJson(scopedApiPath("/api/leads/" + encodeURIComponent(lead.id)), {
       method: "DELETE",
       headers: authHeaders()
     })
@@ -624,6 +638,14 @@
     elements.total = document.getElementById("admin-total");
     elements.list = document.getElementById("admin-leads-list");
     elements.detail = document.getElementById("admin-detail-panel");
+
+    if (!demoSessionId && window.location.pathname.indexOf("/admin-demo/") >= 0) {
+      showLoggedOut();
+      elements.loginPanel.classList.add("is-hidden");
+      setStatus("Откройте админку через страницу запуска демо.", "error");
+      renderEmptyList("Откройте админку через страницу запуска демо.");
+      return;
+    }
 
     elements.username.value = "admin";
     elements.loginButton.addEventListener("click", login);

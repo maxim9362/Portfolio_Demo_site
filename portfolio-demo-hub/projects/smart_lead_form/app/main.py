@@ -1,6 +1,7 @@
 # Creates the FastAPI application, initializes the database, and connects API routers.
 
 from contextlib import asynccontextmanager
+from datetime import datetime, timedelta, timezone
 import logging
 from pathlib import Path
 
@@ -13,7 +14,9 @@ from app.api.form import router as form_router
 from app.api.health import router as health_router
 from app.api.leads import router as leads_router
 from app.core.config import settings
+from app.core.database import SessionLocal
 from app.core.init_db import init_db
+from app.services.lead_service import delete_demo_session_data, delete_expired_demo_data
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -49,6 +52,8 @@ def log_startup_links() -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
+    with SessionLocal() as db:
+        delete_expired_demo_data(db, datetime.now(timezone.utc) - timedelta(minutes=60))
     log_startup_links()
     yield
 
@@ -68,3 +73,14 @@ app.include_router(admin_router)
 app.include_router(form_router)
 app.include_router(leads_router)
 app.mount("/widget", StaticFiles(directory=WIDGET_DIR, html=True), name="widget")
+
+
+@app.delete("/demo-session/{demo_session_id}")
+def delete_demo_session(demo_session_id: str) -> dict[str, str | int]:
+    with SessionLocal() as db:
+        deleted_leads = delete_demo_session_data(db, demo_session_id)
+    return {
+        "status": "deleted",
+        "demo_session_id": demo_session_id,
+        "deleted_leads": deleted_leads,
+    }

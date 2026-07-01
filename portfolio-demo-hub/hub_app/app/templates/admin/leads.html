@@ -1,18 +1,57 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}Leads{% endblock %}
+{% block title %}Заявки{% endblock %}
 {% block content %}
-<h1>Заявки</h1>
+<div class="admin-title">
+  <div>
+    <p class="eyebrow">Контактная форма</p>
+    <h1>Заявки</h1>
+  </div>
+</div>
+
+<form class="filter-bar" method="get" action="/admin/leads">
+  <label>
+    <span>Статус</span>
+    <select name="status_filter">
+      <option value="">Все</option>
+      {% for status in ["new", "viewed", "archived"] %}
+      <option value="{{ status }}" {% if filters.status == status %}selected{% endif %}>{{ status }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>
+    <span>Проект</span>
+    <select name="project_id">
+      <option value="">Все</option>
+      {% for project in projects %}
+      <option value="{{ project.id }}" {% if filters.project_id == project.id %}selected{% endif %}>{{ project.short_title or project.title }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>
+    <span>Тип клиента</span>
+    <select name="client_type">
+      <option value="">Все</option>
+      {% for type in client_types %}
+      <option value="{{ type }}" {% if filters.client_type == type %}selected{% endif %}>{{ type }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <button class="button small primary" type="submit">Фильтровать</button>
+  <a class="button small" href="/admin/leads">Сбросить</a>
+</form>
+
 <div class="table-wrap">
   <table>
     <thead>
       <tr>
         <th>Дата</th>
         <th>Имя</th>
-        <th>Телефон</th>
-        <th>Email</th>
-        <th>Тип клиента</th>
+        <th>Контакты</th>
+        <th>Тип</th>
         <th>Проект</th>
         <th>Сообщение</th>
+        <th>Источник</th>
+        <th>Session ID</th>
         <th>Статус</th>
         <th></th>
       </tr>
@@ -22,19 +61,34 @@
       <tr>
         <td>{{ lead.created_at }}</td>
         <td>{{ lead.name }}</td>
-        <td>{{ lead.phone or "" }}</td>
-        <td>{{ lead.email or "" }}</td>
+        <td>
+          <div>{{ lead.phone or "" }}</div>
+          <div>{{ lead.email or "" }}</div>
+        </td>
         <td>{{ lead.client_type or "" }}</td>
         <td>{{ lead.project_id or "" }}</td>
-        <td>{{ lead.message or "" }}</td>
-        <td>{{ lead.status }}</td>
+        <td class="cell-text">{{ lead.message or "" }}</td>
+        <td class="cell-url">{{ lead.source_page or "" }}</td>
+        <td>
+          {% if lead.session_id %}
+          <a href="/admin/sessions/{{ lead.session_id }}">Путь пользователя</a>
+          <div class="muted">{{ lead.session_id }}</div>
+          {% endif %}
+        </td>
+        <td><span class="status-pill">{{ lead.status }}</span></td>
         <td class="table-actions">
-          <form method="post" action="/admin/leads/{{ lead.id }}/viewed"><button type="submit">Viewed</button></form>
-          <form method="post" action="/admin/leads/{{ lead.id }}/archive"><button type="submit">Archive</button></form>
+          {% if lead.status != "viewed" %}
+          <form method="post" action="/admin/leads/{{ lead.id }}/viewed"><button type="submit">Просмотрена</button></form>
+          {% endif %}
+          {% if lead.status != "archived" %}
+          <form method="post" action="/admin/leads/{{ lead.id }}/archive"><button type="submit">В архив</button></form>
+          {% else %}
+          <form method="post" action="/admin/leads/{{ lead.id }}/restore"><button type="submit">Вернуть</button></form>
+          {% endif %}
         </td>
       </tr>
       {% else %}
-      <tr><td colspan="9">Заявок пока нет.</td></tr>
+      <tr><td colspan="10">Заявок пока нет.</td></tr>
       {% endfor %}
     </tbody>
   </table>

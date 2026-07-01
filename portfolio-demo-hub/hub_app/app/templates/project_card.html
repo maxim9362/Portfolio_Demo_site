@@ -1,11 +1,16 @@
 <article class="project-card">
-  {% if project.preview_image %}
-    <img class="project-preview" src="{{ project.preview_image }}" alt="{{ project.title }}">
-  {% else %}
-    <div class="project-preview placeholder">
-      <span>{{ project.short_title }}</span>
-    </div>
-  {% endif %}
+  <div class="project-preview-wrap">
+    {% if project.preview_image %}
+      <img class="project-preview" src="{{ project.preview_image }}" alt="{{ project.title }}" onerror="this.hidden=true; this.nextElementSibling.hidden=false;">
+      <div class="project-preview placeholder" hidden>
+        <span>{{ project.short_title }}</span>
+      </div>
+    {% else %}
+      <div class="project-preview placeholder">
+        <span>{{ project.short_title }}</span>
+      </div>
+    {% endif %}
+  </div>
   <div class="card-top">
     <span class="badge soft">{{ project.category }}</span>
     <strong class="status-badge">{{ project.status }}</strong>
@@ -18,9 +23,9 @@
     {% endfor %}
   </div>
   <div class="card-actions">
-    <a class="button small" href="/projects/{{ project.id }}">Подробнее</a>
     {% if project.has_demo %}
       <a class="button small primary" data-demo-link data-project-id="{{ project.id }}" href="/launch/{{ project.id }}" data-track-event="project_demo_button_click">{{ project.cta_text }}</a>
     {% endif %}
+    <a class="button small" href="/projects/{{ project.id }}">Подробнее</a>
   </div>
 </article>

@@ -11,7 +11,9 @@ from app.services.admin_auth_service import ensure_default_admin_user
 def ensure_mvp_columns() -> None:
     with engine.begin() as connection:
         connection.execute(text("ALTER TABLE leads ADD COLUMN IF NOT EXISTS status VARCHAR(50) NOT NULL DEFAULT 'new'"))
+        connection.execute(text("ALTER TABLE leads ADD COLUMN IF NOT EXISTS demo_session_id VARCHAR(128)"))
         connection.execute(text("CREATE INDEX IF NOT EXISTS ix_leads_status ON leads (status)"))
+        connection.execute(text("CREATE INDEX IF NOT EXISTS ix_leads_demo_session_id ON leads (demo_session_id)"))
 
 
 def init_db() -> None:

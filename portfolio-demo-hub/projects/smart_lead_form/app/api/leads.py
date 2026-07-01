@@ -1,6 +1,6 @@
 # Exposes endpoints for creating and listing lead records.
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -15,7 +15,7 @@ from app.schemas.lead import (
     LeadStatusUpdateResponse,
     LeadUpdateResponse,
 )
-from app.services.lead_service import create_lead, delete_lead, list_leads, update_lead, update_lead_status
+from app.services.lead_service import create_lead, delete_lead, get_lead, list_leads, update_lead, update_lead_status
 
 router = APIRouter(prefix="/api/leads", tags=["leads"])
 
@@ -52,14 +52,24 @@ def create_lead_endpoint(payload: LeadCreate, db: Session = Depends(get_db)) -> 
 
 @router.get("", response_model=LeadListResponse)
 def list_leads_endpoint(
+    request: Request,
     client_id: str | None = None,
+    demo_session_id: str | None = None,
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
     db: Session = Depends(get_db),
     _: AdminUser = Depends(get_current_admin),
 ) -> dict:
-    items, total = list_leads(db, client_id=client_id, limit=limit, offset=offset)
+    _ensure_demo_admin_scope(request, demo_session_id)
+    items, total = list_leads(
+        db,
+        client_id=client_id,
+        demo_session_id=demo_session_id,
+        limit=limit,
+        offset=offset,
+    )
     return {"items": items, "total": total}
+
 
 
 @router.put("/{lead_id}", response_model=LeadUpdateResponse)
@@ -90,10 +100,17 @@ def update_lead_endpoint(lead_id: int, payload: LeadCreate, db: Session = Depend
 def update_lead_status_endpoint(
     lead_id: int,
     payload: LeadStatusUpdate,
+    request: Request,
+    demo_session_id: str | None = None,
     db: Session = Depends(get_db),
     _: AdminUser = Depends(get_current_admin),
 ) -> dict:
+    _ensure_demo_admin_scope(request, demo_session_id)
     try:
+        current_lead = get_lead(db, lead_id)
+        if current_lead is None:
+            raise LookupError("Lead not found")
+        _ensure_lead_belongs_to_demo_admin_scope(request, current_lead.demo_session_id, demo_session_id)
         lead = update_lead_status(db, lead_id=lead_id, status=payload.status)
     except LookupError as exc:
         raise HTTPException(status_code=404, detail="Заявка не найдена") from exc
@@ -106,12 +123,40 @@ def update_lead_status_endpoint(
 @router.delete("/{lead_id}", response_model=LeadDeleteResponse)
 def delete_lead_endpoint(
     lead_id: int,
+    request: Request,
+    demo_session_id: str | None = None,
     db: Session = Depends(get_db),
     _: AdminUser = Depends(get_current_admin),
 ) -> dict:
+    _ensure_demo_admin_scope(request, demo_session_id)
     try:
+        current_lead = get_lead(db, lead_id)
+        if current_lead is None:
+            raise LookupError("Lead not found")
+        _ensure_lead_belongs_to_demo_admin_scope(request, current_lead.demo_session_id, demo_session_id)
         delete_lead(db, lead_id=lead_id)
     except LookupError as exc:
         raise HTTPException(status_code=404, detail="Заявка не найдена") from exc
 
     return {"id": lead_id, "status": "deleted"}
+
+
+def _is_demo_admin_request(request: Request) -> bool:
+    return request.headers.get("x-demo-admin", "").lower() == "true"
+
+
+def _ensure_demo_admin_scope(request: Request, demo_session_id: str | None) -> None:
+    if _is_demo_admin_request(request) and not demo_session_id:
+        raise HTTPException(
+            status_code=403,
+            detail="Откройте админку через страницу запуска демо.",
+        )
+
+
+def _ensure_lead_belongs_to_demo_admin_scope(
+    request: Request,
+    lead_demo_session_id: str | None,
+    demo_session_id: str | None,
+) -> None:
+    if _is_demo_admin_request(request) and lead_demo_session_id != demo_session_id:
+        raise HTTPException(status_code=404, detail="Заявка не найдена")

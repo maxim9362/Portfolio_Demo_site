@@ -128,9 +128,15 @@ def append_lead_message(
     return lead
 
 
-def list_leads(db: Session) -> list[Lead]:
+def list_leads(db: Session, demo_session_id: str | None = None) -> list[Lead]:
     """Возвращает все заявки от новых к старым."""
-    statement = select(Lead).order_by(
+    statement = select(Lead)
+    if demo_session_id:
+        statement = statement.join(
+            ChatSession,
+            ChatSession.session_id == Lead.session_id,
+        ).where(ChatSession.demo_session_id == demo_session_id)
+    statement = statement.order_by(
         Lead.created_at.desc(),
         Lead.id.desc(),
     )
@@ -199,16 +205,64 @@ def delete_leads_created_before(
     return len(session_ids)
 
 
-def get_latest_lead(db: Session) -> Lead | None:
+def get_latest_lead(db: Session, demo_session_id: str | None = None) -> Lead | None:
     """Возвращает последнюю созданную заявку."""
-    statement = select(Lead).order_by(
+    statement = select(Lead)
+    if demo_session_id:
+        statement = statement.join(
+            ChatSession,
+            ChatSession.session_id == Lead.session_id,
+        ).where(ChatSession.demo_session_id == demo_session_id)
+    statement = statement.order_by(
         Lead.created_at.desc(),
         Lead.id.desc(),
     ).limit(1)
     return db.scalar(statement)
 
 
-def count_new_leads(db: Session) -> int:
+def count_new_leads(db: Session, demo_session_id: str | None = None) -> int:
     """Считает заявки со статусом new."""
     statement = select(func.count(Lead.id)).where(Lead.status == "new")
+    if demo_session_id:
+        statement = statement.join(
+            ChatSession,
+            ChatSession.session_id == Lead.session_id,
+        ).where(ChatSession.demo_session_id == demo_session_id)
     return int(db.scalar(statement) or 0)
+
+
+def delete_demo_session_data(db: Session, demo_session_id: str) -> int:
+    session_ids = list(
+        db.scalars(
+            select(ChatSession.session_id).where(
+                ChatSession.demo_session_id == demo_session_id
+            )
+        )
+    )
+    if not session_ids:
+        return 0
+
+    db.execute(sql_delete(Message).where(Message.session_id.in_(session_ids)))
+    db.execute(sql_delete(Lead).where(Lead.session_id.in_(session_ids)))
+    db.execute(sql_delete(ChatSession).where(ChatSession.session_id.in_(session_ids)))
+    db.commit()
+    return len(session_ids)
+
+
+def delete_demo_sessions_created_before(db: Session, cutoff: datetime) -> int:
+    session_ids = list(
+        db.scalars(
+            select(ChatSession.session_id).where(
+                ChatSession.demo_session_id.is_not(None),
+                ChatSession.created_at < cutoff,
+            )
+        )
+    )
+    if not session_ids:
+        return 0
+
+    db.execute(sql_delete(Message).where(Message.session_id.in_(session_ids)))
+    db.execute(sql_delete(Lead).where(Lead.session_id.in_(session_ids)))
+    db.execute(sql_delete(ChatSession).where(ChatSession.session_id.in_(session_ids)))
+    db.commit()
+    return len(session_ids)

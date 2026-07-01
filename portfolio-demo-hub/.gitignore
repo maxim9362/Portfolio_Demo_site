@@ -1,6 +1,9 @@
 .env
 .env.*
 !.env.example
+!**/.env.example
+**/.env
+*.env
 __pycache__/
 *.py[cod]
 .pytest_cache/
@@ -9,3 +12,7 @@ __pycache__/
 .venv/
 .idea/
 *.log
+.DS_Store
+*.sqlite3
+chroma_data/
+postgres_data/

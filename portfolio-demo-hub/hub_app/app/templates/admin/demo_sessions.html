@@ -1,37 +1,68 @@
 {% extends "admin/base_admin.html" %}
 {% block title %}Demo sessions{% endblock %}
 {% block content %}
-<h1>Demo sessions</h1>
+<div class="admin-title">
+  <div>
+    <p class="eyebrow">Demo tracking</p>
+    <h1>Demo sessions</h1>
+  </div>
+</div>
+
+<form class="filter-bar" method="get" action="/admin/demo-sessions">
+  <label>
+    <span>Проект</span>
+    <select name="project_id">
+      <option value="">Все</option>
+      {% for project in projects %}
+      <option value="{{ project.id }}" {% if filters.project_id == project.id %}selected{% endif %}>{{ project.short_title or project.title }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>
+    <span>Статус</span>
+    <select name="status_filter">
+      <option value="">Все</option>
+      {% for status in ["active", "finished", "expired"] %}
+      <option value="{{ status }}" {% if filters.status == status %}selected{% endif %}>{{ status }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <button class="button small primary" type="submit">Фильтровать</button>
+  <a class="button small" href="/admin/demo-sessions">Сбросить</a>
+</form>
+
 <div class="table-wrap">
   <table>
     <thead>
       <tr>
-        <th>demo_session_id</th>
-        <th>project_id</th>
-        <th>started_at</th>
-        <th>last_seen_at</th>
-        <th>ended_at</th>
-        <th>duration_seconds</th>
-        <th>opened_demo</th>
-        <th>opened_admin</th>
-        <th>status</th>
+        <th>Demo Session ID</th>
+        <th>Session ID</th>
+        <th>Project ID</th>
+        <th>Начало</th>
+        <th>Последняя активность</th>
+        <th>Конец</th>
+        <th>Длительность</th>
+        <th>Demo</th>
+        <th>Admin</th>
+        <th>Статус</th>
       </tr>
     </thead>
     <tbody>
       {% for item in sessions %}
       <tr>
-        <td>{{ item.demo_session_id }}</td>
+        <td><a href="/admin/demo-sessions/{{ item.demo_session_id }}">{{ item.demo_session_id }}</a></td>
+        <td>{% if item.session_id %}<a href="/admin/sessions/{{ item.session_id }}">{{ item.session_id }}</a>{% endif %}</td>
         <td>{{ item.project_id }}</td>
         <td>{{ item.started_at }}</td>
         <td>{{ item.last_seen_at or "" }}</td>
         <td>{{ item.ended_at or "" }}</td>
-        <td>{{ item.duration_seconds or "" }}</td>
-        <td>{{ "yes" if item.opened_demo else "no" }}</td>
-        <td>{{ "yes" if item.opened_admin else "no" }}</td>
-        <td>{{ item.status }}</td>
+        <td>{{ format_duration(duration(item)) }}</td>
+        <td>{{ "да" if item.opened_demo else "нет" }}</td>
+        <td>{{ "да" if item.opened_admin else "нет" }}</td>
+        <td><span class="status-pill">{{ item.status }}</span></td>
       </tr>
       {% else %}
-      <tr><td colspan="9">Demo sessions пока нет.</td></tr>
+      <tr><td colspan="10">Демо-сессий пока нет.</td></tr>
       {% endfor %}
     </tbody>
   </table>

@@ -1,203 +1,250 @@
 # Portfolio Demo Hub
 
-Монорепозиторий для портфолио с живыми demo projects, PostgreSQL, админкой, аналитикой, контактной формой и nginx.
+Portfolio Demo Hub — монорепозиторий с основным сайтом-портфолио, PostgreSQL, админкой, аналитикой, nginx и реальными demo projects:
 
-## Как запустить
+- `projects/ai_site_consultant` — AI_Chat_Web / Universal AI Site Consultant.
+- `projects/smart_lead_form` — Smart Lead Form / Cost Calculator.
+
+## Локальный Запуск
 
 ```bash
 cp .env.example .env
 docker compose up --build
 ```
 
-После запуска nginx публикует сайт на `http://localhost/`.
-
-## Как открыть сайт
+Откройте:
 
 - http://localhost/
 - http://localhost/projects
 - http://localhost/projects/ai-site-consultant
+- http://localhost/projects/smart-lead-form
 - http://localhost/launch/ai-site-consultant
+- http://localhost/launch/smart-lead-form
 - http://localhost/contact
 - http://localhost/for-partners
+- http://localhost/admin
 - http://localhost/health
 
-## Страницы сайта
+Demo URLs:
 
-- `/` - главная страница с описанием AI-automation услуг, проектами, аудиторией, шагами работы и CTA.
-- `/projects` - каталог demo projects с карточками, нишами, статусами и быстрым запуском демо.
-- `/projects/{project_id}` - продающая страница проекта: описание, видео/placeholder, польза, функции, ниши, технологии и CTA.
-- `/launch/{project_id}` - demo wrapper с фиксированной панелью, переключением demo/admin iframe и завершением demo session.
-- `/contact` - контактная форма для заявки на адаптацию проекта.
-- `/for-partners` - страница для веб-дизайнеров, SEO-специалистов, маркетологов, WordPress-разработчиков и небольших агентств.
+- http://localhost/demo/ai-site-consultant/
+- http://localhost/admin-demo/ai-site-consultant/
+- http://localhost/demo/smart-lead-form/
+- http://localhost/admin-demo/smart-lead-form/
 
-## Как открыть админку
+## Production Запуск
 
-Админка доступна по адресу:
+1. Скопируйте env-файлы:
 
-- http://localhost/admin
-
-Basic Auth берёт логин и пароль из `.env`.
-
-Данные по умолчанию:
-
-```text
-ADMIN_USERNAME=admin
-ADMIN_PASSWORD=change_me
+```bash
+cp .env.example .env
+cp projects/ai_site_consultant/.env.example projects/ai_site_consultant/.env
+cp projects/smart_lead_form/.env.example projects/smart_lead_form/.env
 ```
 
-## Улучшенная админка
+2. Замените все `change_me...`, домен и API-ключи на серверные значения.
 
-Разделы:
+3. Запустите production compose:
 
-- `Dashboard` - карточки статистики и последние 10 analytics events.
-- `Заявки` - таблица лидов и действия `Viewed` / `Archive`.
-- `Аналитика` - последние события с session/demo/project данными.
-- `Демо-сессии` - статусы запусков демо, длительность, opened_demo/opened_admin.
-- `Проекты` - проекты, загруженные из `projects/*/project.json`.
+```bash
+docker compose -f docker-compose.prod.yml up -d --build
+```
 
-## Analytics events
+Production compose использует `restart: unless-stopped`, `env_file`, persistent volumes для PostgreSQL и ChromaDB, не монтирует исходный код Hub как writable volume.
 
-Базовые события:
+## Переменные Окружения
 
-- `page_view`
-- `project_view`
-- `contact_open`
-- `contact_submit`
-- `demo_launch`
-- `demo_tab_open`
-- `admin_tab_open`
-- `demo_finish`
-- `heartbeat`
-- `session_end`
+Корневой `.env`:
 
-События для новых CTA и страниц:
+```text
+DATABASE_URL=postgresql+psycopg://portfolio:portfolio@postgres:5432/portfolio
+POSTGRES_DB=portfolio
+POSTGRES_USER=portfolio
+POSTGRES_PASSWORD=change_me
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=change_me_strong_password
+PROJECTS_ROOT=/projects
+DEMO_INTERNAL_BASE_URL=http://nginx
+APP_ENV=production
+APP_HOST=0.0.0.0
+APP_PORT=8000
+SITE_NAME=Maxim AI Automation
+SITE_URL=https://your-domain.com
+```
 
-- `cta_click`
-- `partner_page_view`
-- `project_demo_button_click`
-- `contact_button_click`
+Реальные `.env` не должны попадать в git. В репозитории хранятся только `.env.example`.
 
-## Как добавить новый проект
+## Как Подключить Домен
 
-1. Создайте папку внутри `projects/`, например `projects/my_project`.
-2. Добавьте `project.json` с уникальным `id`, `folder`, `order`, описанием, `demo_path` и `admin_path`.
-3. Если проект имеет собственное демо-приложение, добавьте его `Dockerfile` и сервис в `docker-compose.yml`.
-4. Добавьте nginx-маршруты для demo/admin iframe.
-5. Перезапустите стек: `docker compose up --build`.
+1. На сервере направьте DNS A-record домена на IP сервера.
+2. В `.env` укажите `SITE_URL=https://your-domain.com`.
+3. В env-файлах demo projects укажите production `ALLOWED_ORIGINS`.
+4. Запустите `docker compose -f docker-compose.prod.yml up -d --build`.
 
-## Как скрыть проект
+Nginx уже проксирует:
+
+```text
+/                                      -> portfolio_hub
+/demo/ai-site-consultant/              -> ai_site_consultant
+/admin-demo/ai-site-consultant/        -> ai_site_consultant/admin
+/demo/smart-lead-form/                 -> smart_lead_form
+/admin-demo/smart-lead-form/           -> smart_lead_form/admin
+/project-assets/                       -> static assets из /projects
+```
+
+## HTTPS
+
+Вариант 1: HTTPS через Cloudflare
+
+1. Подключите домен к Cloudflare.
+2. В DNS включите proxy для A-record.
+3. На сервере оставьте nginx на порту `80`.
+4. В Cloudflare SSL/TLS используйте режим `Full` или `Full (strict)`, если добавлен origin certificate.
+
+Вариант 2: HTTPS через certbot на сервере
+
+1. Остановите внешний reverse proxy, если он занимает 80/443.
+2. Выпустите сертификат certbot для домена.
+3. Добавьте отдельный nginx server block на 443 с `ssl_certificate` и `ssl_certificate_key`.
+4. Оставьте текущие `location` и `proxy_set_header` правила.
+
+На этом этапе certbot не установлен в compose намеренно.
+
+## Как Проверить Админку
+
+Portfolio Hub admin закрыт Basic Auth:
+
+```text
+/admin
+/admin/leads
+/admin/analytics
+/admin/sessions
+/admin/demo-sessions
+/admin/projects
+```
+
+Логин и пароль берутся только из `.env`:
+
+```text
+ADMIN_USERNAME
+ADMIN_PASSWORD
+```
+
+Demo admin открывается через `/launch/{project_id}`. Если открыть `/admin-demo/...` без `demo_session_id`, приложение покажет безопасное сообщение и не отдаст чужие demo data.
+
+## Backup PostgreSQL
+
+Backup основной базы Hub:
+
+```bash
+docker compose exec postgres pg_dump -U portfolio portfolio > backup.sql
+```
+
+Restore:
+
+```bash
+cat backup.sql | docker compose exec -T postgres psql -U portfolio portfolio
+```
+
+Если в `.env` другой пользователь или имя базы, подставьте свои значения вместо `portfolio`.
+
+## Логи
+
+```bash
+docker compose logs -f nginx
+docker compose logs -f portfolio_hub
+docker compose logs -f ai_site_consultant
+docker compose logs -f smart_lead_form
+```
+
+Для production:
+
+```bash
+docker compose -f docker-compose.prod.yml logs -f nginx
+docker compose -f docker-compose.prod.yml logs -f portfolio_hub
+docker compose -f docker-compose.prod.yml logs -f ai_site_consultant
+docker compose -f docker-compose.prod.yml logs -f smart_lead_form
+```
+
+## Health Checks
+
+```text
+http://localhost/health
+http://localhost/demo/ai-site-consultant/health
+http://localhost/demo/smart-lead-form/health
+```
+
+Каждый endpoint должен вернуть:
+
+```json
+{"status": "ok"}
+```
+
+## Контент Проекта
+
+Каждый проект описывается файлом:
+
+```text
+projects/<project_folder>/project.json
+```
+
+Превью:
+
+```text
+projects/ai_site_consultant/preview.png
+projects/smart_lead_form/preview.png
+```
+
+На сайте используется путь через nginx:
+
+```text
+/project-assets/ai_site_consultant/preview.png
+```
+
+Если `preview_image` пустой или файл не загрузился, сайт покажет заглушку.
+
+Если `video_url` пустой, страница проекта покажет “Видео будет добавлено позже”. Скриншоты добавляются через `screenshots`; если массив пустой, блок скрывается.
+
+## Как Добавить Новый Проект
+
+1. Создайте папку в `projects/`, например `projects/new_project`.
+2. Добавьте реальный проект с `Dockerfile`, `requirements.txt`, `app/` и файлами запуска.
+3. Добавьте `project.json` с уникальным `id`, `demo_path`, `admin_path`, `cleanup_path`.
+4. Добавьте сервис проекта и, если нужно, отдельный PostgreSQL в `docker-compose.yml` и `docker-compose.prod.yml`.
+5. Добавьте nginx routes `/demo/new-project/` и `/admin-demo/new-project/`.
+6. Запустите `docker compose up --build`.
+
+## Как Скрыть Проект
 
 В `project.json` установите:
 
 ```json
-"is_active": false
+{
+  "is_active": false
+}
 ```
 
-Project Loader игнорирует такие проекты и не показывает их на сайте и в админском списке активных проектов.
+Проект останется в папке, но исчезнет из каталога.
 
-## Как удалить проект
+## Как Удалить Проект
 
-1. Остановите стек: `docker compose down`.
-2. Удалите папку проекта из `projects/`.
-3. Удалите его сервис из `docker-compose.yml`, если он был добавлен.
-4. Удалите связанные location-блоки из `nginx/nginx.conf`.
-5. Запустите стек снова: `docker compose up --build`.
+1. Остановите compose.
+2. Удалите сервис проекта из `docker-compose.yml` и `docker-compose.prod.yml`.
+3. Удалите nginx routes проекта.
+4. Удалите папку проекта из `projects/`, если она больше не нужна.
+5. Удалите связанные Docker volumes только если данные точно не нужны.
 
-## Как проверить demo/admin iframe
+## Security
 
-Подключены два реальных demo project:
+- Реальные `.env` игнорируются git.
+- Nginx добавляет базовые security headers.
+- `client_max_body_size` ограничен `10M`.
+- `X-Frame-Options` установлен в `SAMEORIGIN`, чтобы iframe внутри Portfolio Hub продолжал работать.
+- Portfolio Hub admin требует Basic Auth.
+- Demo admin ограничен текущим `demo_session_id`.
 
-- AI Site Consultant: `projects/ai_site_consultant`
-- Smart Lead Form / Cost Calculator: `projects/smart_lead_form`
+## Не Добавлено Намеренно
 
-Для AI Site Consultant доступны:
-
-- http://localhost/demo/ai-site-consultant/
-- http://localhost/admin-demo/ai-site-consultant/
-- http://localhost/demo/ai-site-consultant/health
-
-Для Smart Lead Form доступны:
-
-- http://localhost/demo/smart-lead-form/
-- http://localhost/admin-demo/smart-lead-form/
-- http://localhost/demo/smart-lead-form/health
-
-Launch wrapper сам передаёт в iframe параметры `demo_session_id` и `session_id`:
-
-```text
-?demo_session_id=...&session_id=...
-```
-
-На странице `http://localhost/launch/ai-site-consultant` проверьте кнопки `Демо`, `Админка` и `Завершить демо`.
-
-Для второго проекта используйте:
-
-- http://localhost/projects/smart-lead-form
-- http://localhost/launch/smart-lead-form
-
-При завершении демо Portfolio Hub завершает свою `DemoSession` и отправляет `DELETE /demo-session/{demo_session_id}` в соответствующий demo project, чтобы очистить временные данные текущей demo session.
-
-## Как подключены реальные проекты
-
-Каждый проект лежит внутри `projects/` как отдельное Docker-приложение со своими файлами:
-
-```text
-Dockerfile
-requirements.txt
-.env.example
-.env
-project.json
-preview.png
-video.mp4
-app/
-```
-
-`project.json` читает Project Loader в `hub_app`. `docker-compose.yml` собирает проекты как отдельные сервисы, а `nginx/nginx.conf` проксирует demo/admin пути в нужный контейнер.
-
-Чтобы добавить следующий проект:
-
-1. Создайте папку `projects/new_project`.
-2. Добавьте `Dockerfile`, `requirements.txt`, `.env.example`, `.env`, `app/` и `project.json`.
-3. Укажите уникальный `id`, например `new-project`.
-4. Добавьте сервис в `docker-compose.yml`.
-5. Добавьте nginx routes `/demo/new-project/` и `/admin-demo/new-project/`.
-6. Запустите `docker compose up --build`.
-
-## Что намеренно не добавлено
-
-- Email-уведомления
-- Alembic
-## Real Demo Projects
-
-Portfolio Demo Hub запускает реальные проекты, а не тестовые формы-заглушки:
-
-- `projects/ai_site_consultant` - реальный проект `AI_Chat_Web` / Universal AI Site Consultant.
-- `projects/smart_lead_form` - реальный проект Smart Lead Form / Cost Calculator.
-
-Каждый demo project запускается как отдельное Docker-приложение. Основные файлы проектов лежат в корне их папок:
-
-```text
-app/
-knowledge/ или widget/
-scripts/
-Dockerfile
-requirements.txt
-.env.example
-README.md
-project.json
-```
-
-Проверка после `docker compose up --build`:
-
-- `http://localhost/demo/ai-site-consultant/`
-- `http://localhost/launch/ai-site-consultant`
-- `http://localhost/demo/smart-lead-form/`
-- `http://localhost/launch/smart-lead-form`
-
-AI demo должно показывать реальный лендинг AI_Chat_Web с подключенным AI-чатом, а не страницу `Demo session` с простой формой. Smart demo должно показывать реальный Smart Lead Form с `SmartLeadFormConfig`, а не тестовую форму.
-
-Базы PostgreSQL разделены:
-
-- `portfolio` - таблицы Portfolio Hub.
-- `ai_consultant` - таблицы AI_Chat_Web.
-- `smart_lead_form` - таблицы Smart Lead Form.
+- Email-уведомления в Portfolio Hub.
+- Alembic для Hub.
+- Заглушки вместо реальных demo projects.

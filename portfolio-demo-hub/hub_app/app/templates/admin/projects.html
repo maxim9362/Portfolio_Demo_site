@@ -1,19 +1,29 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}Projects{% endblock %}
+{% block title %}Проекты{% endblock %}
 {% block content %}
-<h1>Projects</h1>
+<div class="admin-title">
+  <div>
+    <p class="eyebrow">Project loader</p>
+    <h1>Проекты</h1>
+  </div>
+</div>
+
 <div class="table-wrap">
   <table>
     <thead>
       <tr>
-        <th>id</th>
-        <th>title</th>
-        <th>folder</th>
-        <th>is_active</th>
-        <th>has_demo</th>
-        <th>has_admin_demo</th>
-        <th>demo_path</th>
-        <th>admin_path</th>
+        <th>ID</th>
+        <th>Название</th>
+        <th>Папка</th>
+        <th>Активен</th>
+        <th>Порядок</th>
+        <th>Категория</th>
+        <th>Статус</th>
+        <th>Demo path</th>
+        <th>Admin path</th>
+        <th>Demo</th>
+        <th>Admin demo</th>
+        <th>Ссылки</th>
       </tr>
     </thead>
     <tbody>
@@ -22,14 +32,23 @@
         <td>{{ project.id }}</td>
         <td>{{ project.title }}</td>
         <td>{{ project.folder }}</td>
-        <td>{{ project.is_active }}</td>
-        <td>{{ project.has_demo }}</td>
-        <td>{{ project.has_admin_demo }}</td>
-        <td>{{ project.demo_path }}</td>
-        <td>{{ project.admin_path }}</td>
+        <td>{{ "да" if project.is_active else "нет" }}</td>
+        <td>{{ project.order }}</td>
+        <td>{{ project.category }}</td>
+        <td>{{ project.status }}</td>
+        <td class="cell-url">{{ project.demo_path }}</td>
+        <td class="cell-url">{{ project.admin_path }}</td>
+        <td>{{ "да" if project.has_demo else "нет" }}</td>
+        <td>{{ "да" if project.has_admin_demo else "нет" }}</td>
+        <td class="quick-links">
+          <a href="/projects/{{ project.id }}">Страница</a>
+          <a href="/launch/{{ project.id }}">Запустить</a>
+          {% if project.demo_path %}<a href="{{ project.demo_path }}">Demo</a>{% endif %}
+          {% if project.admin_path %}<a href="{{ project.admin_path }}">Admin</a>{% endif %}
+        </td>
       </tr>
       {% else %}
-      <tr><td colspan="8">Проекты пока не добавлены.</td></tr>
+      <tr><td colspan="12">Проекты пока не добавлены.</td></tr>
       {% endfor %}
     </tbody>
   </table>

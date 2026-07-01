@@ -76,6 +76,8 @@
     try {
       await fetch(`/api/demo-session/${encodeURIComponent(demoSessionId)}/finish`, {
         method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({project_id: projectId}),
         keepalive: true
       }).catch(() => {});
 
@@ -109,14 +111,10 @@
   document.querySelector("[data-finish-demo]").addEventListener("click", async () => {
     await fetch(`/api/demo-session/${encodeURIComponent(demoSessionId)}/finish`, {
       method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({project_id: projectId}),
       keepalive: true
     }).catch(() => {});
-    if (demoDeletePath) {
-      await fetch(demoDeletePath, {
-        method: "DELETE",
-        keepalive: true
-      }).catch(() => {});
-    }
     window.location.href = returnUrl;
   });
 

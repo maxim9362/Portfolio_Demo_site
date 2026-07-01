@@ -53,19 +53,22 @@ def get_contact_time_error(value: str | None, now: datetime | None = None) -> st
     return None
 
 
-def has_recent_lead(db: Session, client_id: str, normalized_phone: str) -> bool:
+def has_recent_lead(
+    db: Session,
+    client_id: str,
+    normalized_phone: str,
+    demo_session_id: str | None = None,
+) -> bool:
     """Check whether the same browser/user phone already created a fresh lead."""
     since = datetime.now(timezone.utc) - LEAD_REPEAT_WINDOW
-    return (
-        db.query(Lead)
-        .filter(
-            Lead.client_id == client_id,
-            Lead.phone == normalized_phone,
-            Lead.created_at >= since,
-        )
-        .first()
-        is not None
+    query = db.query(Lead).filter(
+        Lead.client_id == client_id,
+        Lead.phone == normalized_phone,
+        Lead.created_at >= since,
     )
+    if demo_session_id:
+        query = query.filter(Lead.demo_session_id == demo_session_id)
+    return query.first() is not None
 
 
 def create_lead(db: Session, lead_data: LeadCreate) -> Lead:
@@ -79,12 +82,18 @@ def create_lead(db: Session, lead_data: LeadCreate) -> Lead:
     if contact_time_error:
         raise ValueError(contact_time_error)
 
-    if has_recent_lead(db, lead_data.client_id, normalized_phone):
+    if has_recent_lead(
+        db,
+        lead_data.client_id,
+        normalized_phone,
+        demo_session_id=lead_data.demo_session_id,
+    ):
         raise ValueError("Recent lead already exists")
 
     lead = Lead(
         client_id=lead_data.client_id,
         scenario_key=lead_data.scenario_key,
+        demo_session_id=lead_data.demo_session_id,
         service_type=lead_data.service_type,
         language_pair=lead_data.language_pair,
         page_count=lead_data.page_count,
@@ -121,6 +130,7 @@ def create_lead(db: Session, lead_data: LeadCreate) -> Lead:
 def list_leads(
     db: Session,
     client_id: str | None = None,
+    demo_session_id: str | None = None,
     limit: int = 50,
     offset: int = 0,
 ) -> tuple[list[Lead], int]:
@@ -129,6 +139,8 @@ def list_leads(
 
     if client_id:
         query = query.filter(Lead.client_id == client_id)
+    if demo_session_id:
+        query = query.filter(Lead.demo_session_id == demo_session_id)
 
     total = query.count()
     items = query.order_by(Lead.created_at.desc()).offset(offset).limit(limit).all()
@@ -156,6 +168,7 @@ def update_lead(db: Session, lead_id: int, lead_data: LeadCreate) -> Lead:
 
     lead.client_id = lead_data.client_id
     lead.scenario_key = lead_data.scenario_key
+    lead.demo_session_id = lead_data.demo_session_id
     lead.service_type = lead_data.service_type
     lead.language_pair = lead_data.language_pair
     lead.page_count = lead_data.page_count
@@ -204,3 +217,20 @@ def delete_lead(db: Session, lead_id: int) -> None:
 
     db.delete(lead)
     db.commit()
+
+
+def delete_demo_session_data(db: Session, demo_session_id: str) -> int:
+    query = db.query(Lead).filter(Lead.demo_session_id == demo_session_id)
+    deleted = query.delete(synchronize_session=False)
+    db.commit()
+    return int(deleted or 0)
+
+
+def delete_expired_demo_data(db: Session, cutoff: datetime) -> int:
+    query = db.query(Lead).filter(
+        Lead.demo_session_id.is_not(None),
+        Lead.created_at < cutoff,
+    )
+    deleted = query.delete(synchronize_session=False)
+    db.commit()
+    return int(deleted or 0)

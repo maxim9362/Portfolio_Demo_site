@@ -10,6 +10,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.config import settings
 from app.database.db import SessionLocal
 from app.repositories.lead_repository import delete_leads_created_before
+from app.repositories.lead_repository import delete_demo_sessions_created_before
 
 
 logger = logging.getLogger(__name__)
@@ -33,6 +34,18 @@ def delete_expired_leads() -> int:
             "Удалено устаревших заявок вместе с диалогами: %s",
             deleted_count,
         )
+    return deleted_count
+
+
+def delete_expired_demo_sessions() -> int:
+    cutoff = datetime.now(timezone.utc) - timedelta(minutes=60)
+    with SessionLocal() as db:
+        try:
+            deleted_count = delete_demo_sessions_created_before(db, cutoff)
+        except SQLAlchemyError:
+            db.rollback()
+            logger.exception("Failed to delete expired demo sessions")
+            return 0
     return deleted_count
 
 

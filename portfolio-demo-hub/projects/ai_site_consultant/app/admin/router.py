@@ -44,8 +44,11 @@ ALLOWED_STATUSES = frozenset(STATUS_LABELS)
 async def admin_index(
     request: Request,
     db: Session = Depends(get_db),
-) -> RedirectResponse:
+) -> Response:
     """Перенаправляет на вход или список заявок."""
+    _current_demo_session_id(request)
+    if _demo_admin_requires_session(request):
+        return _demo_session_required(request)
     destination = (
         "/admin/leads"
         if _authenticated_admin(request, db) is not None
@@ -60,6 +63,9 @@ async def login_page(
     db: Session = Depends(get_db),
 ) -> Response:
     """Показывает форму входа или открывает заявки авторизованному admin."""
+    _current_demo_session_id(request)
+    if _demo_admin_requires_session(request):
+        return _demo_session_required(request)
     if _authenticated_admin(request, db) is not None:
         return RedirectResponse("/admin/leads", status_code=303)
     return templates.TemplateResponse(
@@ -76,6 +82,10 @@ async def login(
 ) -> Response:
     """Проверяет учетные данные и создает cookie-сессию."""
     form = await request.form()
+    if _is_demo_admin_request(request):
+        demo_session_id = form.get("demo_session_id")
+        if not isinstance(demo_session_id, str) or not demo_session_id:
+            return _demo_session_required(request)
     if not validate_csrf_token(request, str(form.get("csrf_token", ""))):
         return _csrf_error(request)
 
@@ -99,6 +109,9 @@ async def login(
     request.session.clear()
     request.session["admin_id"] = admin.id
     request.session["csrf_token"] = get_csrf_token(request)
+    demo_session_id = form.get("demo_session_id")
+    if isinstance(demo_session_id, str) and demo_session_id:
+        request.session["demo_session_id"] = demo_session_id
     return RedirectResponse("/admin/leads", status_code=303)
 
 
@@ -127,14 +140,19 @@ async def leads_page(
     unauthorized = _login_redirect_if_needed(request, db)
     if unauthorized:
         return unauthorized
-    leads = [present_lead(lead) for lead in list_leads(db)]
+    demo_session_id = _current_demo_session_id(request)
+    leads = [
+        present_lead(lead)
+        for lead in list_leads(db, demo_session_id=demo_session_id)
+    ]
     return templates.TemplateResponse(
         request=request,
         name="leads.html",
         context=_template_context(
             request,
             leads=leads,
-            new_count=count_new_leads(db),
+            new_count=count_new_leads(db, demo_session_id=demo_session_id),
+            demo_session_id=demo_session_id,
         ),
     )
 
@@ -148,14 +166,15 @@ async def latest_lead_info(
     unauthorized = _login_redirect_if_needed(request, db)
     if unauthorized:
         return unauthorized
-    latest = get_latest_lead(db)
+    demo_session_id = _current_demo_session_id(request)
+    latest = get_latest_lead(db, demo_session_id=demo_session_id)
     return JSONResponse(
         {
             "latest_lead_id": latest.id if latest else None,
             "latest_created_at": (
                 latest.created_at.isoformat() if latest else None
             ),
-            "new_count": count_new_leads(db),
+            "new_count": count_new_leads(db, demo_session_id=demo_session_id),
         }
     )
 
@@ -170,9 +189,16 @@ async def lead_detail_page(
     unauthorized = _login_redirect_if_needed(request, db)
     if unauthorized:
         return unauthorized
+    demo_session_id = _current_demo_session_id(request)
     lead = get_lead_by_id(db, lead_id)
     if lead is None:
         return _not_found(request, "Заявка не найдена")
+    if demo_session_id:
+        allowed_ids = {
+            item.id for item in list_leads(db, demo_session_id=demo_session_id)
+        }
+        if lead.id not in allowed_ids:
+            return _not_found(request, "Р—Р°СЏРІРєР° РЅРµ РЅР°Р№РґРµРЅР°")
     messages = get_latest_messages(db, lead.session_id, limit=12)
     return templates.TemplateResponse(
         request=request,
@@ -304,8 +330,10 @@ def _authenticated_admin(
 def _login_redirect_if_needed(
     request: Request,
     db: Session,
-) -> RedirectResponse | None:
+) -> Response | None:
     """Возвращает редирект на вход для неавторизованного запроса."""
+    if _demo_admin_requires_session(request):
+        return _demo_session_required(request)
     if _authenticated_admin(request, db) is None:
         return RedirectResponse("/admin/login", status_code=303)
     return None
@@ -318,8 +346,34 @@ def _template_context(request: Request, **values: Any) -> dict[str, Any]:
         "flash": request.session.pop("flash", None),
         "current_year": datetime.now().year,
         "is_authenticated": isinstance(request.session.get("admin_id"), int),
+        "demo_session_id": _current_demo_session_id(request),
         **values,
     }
+
+
+def _current_demo_session_id(request: Request) -> str | None:
+    query_value = request.query_params.get("demo_session_id")
+    if query_value:
+        request.session["demo_session_id"] = query_value
+        return query_value
+    session_value = request.session.get("demo_session_id")
+    return session_value if isinstance(session_value, str) else None
+
+
+def _is_demo_admin_request(request: Request) -> bool:
+    return request.headers.get("x-demo-admin", "").lower() == "true"
+
+
+def _demo_admin_requires_session(request: Request) -> bool:
+    return _is_demo_admin_request(request) and _current_demo_session_id(request) is None
+
+
+def _demo_session_required(request: Request) -> HTMLResponse:
+    return _not_found(
+        request,
+        "Откройте админку через страницу запуска демо.",
+        status_code=403,
+    )
 
 
 def _set_flash(request: Request, message: str) -> None:

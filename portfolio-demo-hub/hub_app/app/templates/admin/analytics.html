@@ -1,35 +1,100 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}Analytics{% endblock %}
+{% block title %}Аналитика{% endblock %}
 {% block content %}
-<h1>Analytics events</h1>
-<div class="table-wrap">
-  <table>
-    <thead>
-      <tr>
-        <th>created_at</th>
-        <th>event_type</th>
-        <th>session_id</th>
-        <th>demo_session_id</th>
-        <th>project_id</th>
-        <th>page_url</th>
-        <th>metadata_json</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for event in events %}
-      <tr>
-        <td>{{ event.created_at }}</td>
-        <td>{{ event.event_type }}</td>
-        <td>{{ event.session_id or "" }}</td>
-        <td>{{ event.demo_session_id or "" }}</td>
-        <td>{{ event.project_id or "" }}</td>
-        <td>{{ event.page_url or "" }}</td>
-        <td>{{ event.metadata_json or "" }}</td>
-      </tr>
-      {% else %}
-      <tr><td colspan="7">Событий пока нет.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<div class="admin-title">
+  <div>
+    <p class="eyebrow">Агрегаты и события</p>
+    <h1>Аналитика</h1>
+  </div>
 </div>
+
+<section class="admin-section detail-grid-admin">
+  <div>
+    <h2>Популярные страницы</h2>
+    <div class="list-panel">
+      {% for page, count in popular_pages %}
+      <div><span>{{ page }}</span><strong>{{ count }}</strong></div>
+      {% else %}<p>Данных пока нет.</p>{% endfor %}
+    </div>
+  </div>
+  <div>
+    <h2>Популярные проекты</h2>
+    <div class="list-panel">
+      {% for project, count in popular_projects %}
+      <div><span>{{ project }}</span><strong>{{ count }}</strong></div>
+      {% else %}<p>Данных пока нет.</p>{% endfor %}
+    </div>
+  </div>
+  <div>
+    <h2>Запуски демо</h2>
+    <div class="list-panel">
+      {% for project, count in demo_by_project %}
+      <div><span>{{ project }}</span><strong>{{ count }}</strong></div>
+      {% else %}<p>Запусков пока нет.</p>{% endfor %}
+    </div>
+  </div>
+  <div>
+    <h2>Переходы в demo admin</h2>
+    <div class="list-panel">
+      {% for project, count in admin_by_project %}
+      <div><span>{{ project }}</span><strong>{{ count }}</strong></div>
+      {% else %}<p>Переходов пока нет.</p>{% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="admin-section">
+  <h2>Конверсии</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Проект</th><th>Просмотры</th><th>Запуски demo</th><th>Заявки</th><th>Просмотр -> demo</th><th>Demo -> заявка</th></tr></thead>
+      <tbody>
+        {% for item in conversions %}
+        <tr>
+          <td>{{ item.project_id }}</td>
+          <td>{{ item.views }}</td>
+          <td>{{ item.launches }}</td>
+          <td>{{ item.leads }}</td>
+          <td>{{ item.view_to_demo }}%</td>
+          <td>{{ item.demo_to_lead }}%</td>
+        </tr>
+        {% else %}<tr><td colspan="6">Данных пока нет.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="admin-section">
+  <h2>Последние analytics events</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Дата</th>
+          <th>Событие</th>
+          <th>Session ID</th>
+          <th>Demo Session ID</th>
+          <th>Проект</th>
+          <th>Страница</th>
+          <th>Metadata</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for event in events %}
+        <tr>
+          <td>{{ event.created_at }}</td>
+          <td><span class="status-pill">{{ event.event_type }}</span></td>
+          <td>{% if event.session_id %}<a href="/admin/sessions/{{ event.session_id }}">{{ event.session_id }}</a>{% endif %}</td>
+          <td>{% if event.demo_session_id %}<a href="/admin/demo-sessions/{{ event.demo_session_id }}">{{ event.demo_session_id }}</a>{% endif %}</td>
+          <td>{{ event.project_id or "" }}</td>
+          <td class="cell-url">{{ event.page_url or "" }}</td>
+          <td class="cell-text">{{ event.metadata_json or "" }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7">Событий пока нет.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
 {% endblock %}

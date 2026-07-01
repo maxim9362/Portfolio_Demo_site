@@ -46,9 +46,10 @@ def stream_chat_answer(
     llm_client: LLMClient,
     session_id: str,
     user_message: str,
+    demo_session_id: str | None = None,
 ) -> AsyncIterator[str]:
     """Обрабатывает сообщение, восстанавливает контекст и возвращает поток."""
-    chat_session = get_or_create_session(db, session_id)
+    chat_session = get_or_create_session(db, session_id, demo_session_id)
     saved_user_message = save_message(
         db=db,
         session_id=chat_session.session_id,

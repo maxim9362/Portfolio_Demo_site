@@ -3,7 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}Maxim AI Automation{% endblock %}</title>
+  <title>{% block title %}AI-автоматизация для бизнеса — Maxim AI Automation{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}AI-консультанты, умные формы заявок, WhatsApp-боты и automation-решения для малого бизнеса.{% endblock %}">
+  <meta property="og:title" content="{% block og_title %}AI-автоматизация для бизнеса — Maxim AI Automation{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}AI-консультанты, умные формы заявок, WhatsApp-боты и automation-решения для малого бизнеса.{% endblock %}">
+  <meta property="og:image" content="{% block og_image %}/project-assets/ai_site_consultant/preview.png{% endblock %}">
+  <meta property="og:type" content="website">
   <link rel="stylesheet" href="/static/css/styles.css">
   {% block head %}{% endblock %}
 </head>
@@ -16,7 +21,7 @@
     <nav class="main-nav" aria-label="Основная навигация">
       <a href="/">Главная</a>
       <a href="/projects">Проекты</a>
-      <a href="/for-partners">Для партнёров</a>
+      <a href="/for-partners">Для партнеров</a>
       <a href="/contact" data-track-event="contact_button_click">Связаться</a>
     </nav>
   </header>

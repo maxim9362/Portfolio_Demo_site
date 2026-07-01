@@ -1,4 +1,7 @@
 from typing import Any
+from urllib.error import HTTPError, URLError
+from urllib.request import Request as UrlRequest
+from urllib.request import urlopen
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -7,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.db.database import get_db
 from app.db.models import ContactLead, DemoSession
+from app.config import get_settings
 from app.services.analytics import finish_demo_session, record_event
 from app.services.project_loader import get_project
 
@@ -44,6 +48,10 @@ class DemoSessionStartPayload(BaseModel):
     session_id: str | None = None
     previous_demo_session_id: str | None = None
     page_url: str | None = None
+
+
+class DemoSessionFinishPayload(BaseModel):
+    project_id: str | None = None
 
 
 @router.post("/contact")
@@ -111,7 +119,9 @@ def demo_start(
         raise HTTPException(status_code=404, detail="Demo not found")
 
     if payload.previous_demo_session_id:
-        finish_demo_session(db, payload.previous_demo_session_id)
+        previous_demo = finish_demo_session(db, payload.previous_demo_session_id)
+        if previous_demo:
+            _cleanup_demo_project(previous_demo.project_id, payload.previous_demo_session_id)
 
     session_id = payload.session_id or f"session_{uuid4().hex}"
     demo_session_id = f"demo_{uuid4().hex}"
@@ -140,18 +150,50 @@ def demo_start(
 
 
 @router.post("/demo-session/{demo_session_id}/finish")
-def demo_finish(demo_session_id: str, request: Request, db: Session = Depends(get_db)) -> dict[str, bool]:
+def demo_finish(
+    demo_session_id: str,
+    request: Request,
+    payload: DemoSessionFinishPayload | None = None,
+    db: Session = Depends(get_db),
+) -> dict[str, bool]:
     demo = finish_demo_session(db, demo_session_id)
     if not demo:
         raise HTTPException(status_code=404, detail="Demo session not found")
+    project_id = payload.project_id if payload and payload.project_id else demo.project_id
     record_event(
         db,
         "demo_finish",
         session_id=demo.session_id,
         demo_session_id=demo_session_id,
-        project_id=demo.project_id,
+        project_id=project_id,
         page_url=str(request.url),
         request=request,
     )
+    cleanup_ok = _cleanup_demo_project(project_id, demo_session_id)
     db.commit()
-    return {"success": True}
+    return {"success": True, "cleanup": cleanup_ok}
+
+
+def _cleanup_demo_project(project_id: str | None, demo_session_id: str) -> bool:
+    if not project_id:
+        return False
+
+    project = get_project(project_id)
+    if not project:
+        return False
+
+    cleanup_path = project.get("cleanup_path")
+    if not cleanup_path:
+        demo_path = str(project.get("demo_path", ""))
+        cleanup_path = f"{demo_path.rstrip('/')}/demo-session/{{demo_session_id}}"
+
+    cleanup_url = cleanup_path.replace("{demo_session_id}", demo_session_id)
+    if cleanup_url.startswith("/"):
+        cleanup_url = f"{get_settings().demo_internal_base_url.rstrip('/')}{cleanup_url}"
+
+    try:
+        request = UrlRequest(cleanup_url, method="DELETE")
+        with urlopen(request, timeout=5) as response:
+            return 200 <= response.status < 300
+    except (HTTPError, URLError, TimeoutError, ValueError):
+        return False

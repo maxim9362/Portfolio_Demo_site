@@ -17,8 +17,10 @@
     }
 
     const backendBaseUrl = new URL(widgetScript.src, document.baseURI).origin;
+    const pageParams = new URLSearchParams(window.location.search);
+    const demoSessionId = pageParams.get("demo_session_id") || "";
     const chatEndpoint = `${backendBaseUrl}/api/chat`;
-    const sessionStorageKey = `uaisc_session_id:${backendBaseUrl}`;
+    const sessionStorageKey = `uaisc_session_id:${backendBaseUrl}:${demoSessionId || "default"}`;
     const reducedMotion = window.matchMedia(
         "(prefers-reduced-motion: reduce)",
     ).matches;
@@ -756,6 +758,7 @@
                     body: JSON.stringify({
                         session_id: widgetSessionId,
                         message: userMessage,
+                        demo_session_id: demoSessionId || null,
                     }),
                 });
                 if (!chatResponse.ok) {

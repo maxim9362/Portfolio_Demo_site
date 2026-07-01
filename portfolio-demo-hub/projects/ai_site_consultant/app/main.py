@@ -17,7 +17,10 @@ from app.admin.router import router as admin_router
 from app.api.router import api_router
 from app.config import settings
 from app.database.initializer import initialize_database
+from app.database.db import SessionLocal
+from app.repositories.lead_repository import delete_demo_session_data
 from app.services.data_retention_service import (
+    delete_expired_demo_sessions,
     delete_expired_leads,
     retention_cleanup_loop,
     stop_retention_task,
@@ -49,6 +52,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     """Подготавливает общую базу чата и админки при запуске приложения."""
     admin = initialize_database()
     deleted_count = await asyncio.to_thread(delete_expired_leads)
+    await asyncio.to_thread(delete_expired_demo_sessions)
     retention_task = asyncio.create_task(retention_cleanup_loop())
     startup_logger.info(
         "\n"
@@ -97,6 +101,17 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 async def health() -> dict[str, str]:
     """Сообщает, что HTTP-приложение запущено."""
     return {"status": "ok"}
+
+
+@app.delete("/demo-session/{demo_session_id}")
+async def delete_demo_session(demo_session_id: str) -> dict[str, str | int]:
+    with SessionLocal() as db:
+        deleted_sessions = delete_demo_session_data(db, demo_session_id)
+    return {
+        "status": "deleted",
+        "demo_session_id": demo_session_id,
+        "deleted_sessions": deleted_sessions,
+    }
 
 
 @app.get("/", include_in_schema=False)

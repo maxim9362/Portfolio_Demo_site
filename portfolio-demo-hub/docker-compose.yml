@@ -21,6 +21,8 @@ services:
       context: ./hub_app
     env_file:
       - .env
+    environment:
+      DEMO_INTERNAL_BASE_URL: ${DEMO_INTERNAL_BASE_URL:-http://nginx}
     volumes:
       - ./projects:/projects:ro
     depends_on:

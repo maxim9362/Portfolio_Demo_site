@@ -47,6 +47,7 @@ async def chat(
             llm_client=llm_client,
             session_id=payload.session_id,
             user_message=payload.message,
+            demo_session_id=payload.demo_session_id,
         )
     except SQLAlchemyError as exc:
         db.rollback()

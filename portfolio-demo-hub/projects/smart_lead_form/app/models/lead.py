@@ -18,6 +18,7 @@ class Lead(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     client_id: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     scenario_key: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
+    demo_session_id: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
 
     service_type: Mapped[str | None] = mapped_column(String(100), nullable=True)
     language_pair: Mapped[str | None] = mapped_column(String(100), nullable=True)

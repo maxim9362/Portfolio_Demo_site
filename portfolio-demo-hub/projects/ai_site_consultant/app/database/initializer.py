@@ -27,6 +27,22 @@ def initialize_database() -> AdminCredential:
                 )
             )
 
+    session_columns = {
+        column["name"]
+        for column in inspect(engine).get_columns("sessions")
+    }
+    if "demo_session_id" not in session_columns:
+        with engine.begin() as connection:
+            connection.execute(
+                text("ALTER TABLE sessions ADD COLUMN demo_session_id VARCHAR(128)")
+            )
+            connection.execute(
+                text(
+                    "CREATE INDEX IF NOT EXISTS ix_sessions_demo_session_id "
+                    "ON sessions (demo_session_id)"
+                )
+            )
+
     lead_session_index = next(
         index
         for index in Lead.__table__.indexes

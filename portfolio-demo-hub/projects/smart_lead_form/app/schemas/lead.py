@@ -9,6 +9,7 @@ from pydantic import BaseModel, ConfigDict, Field
 class LeadCreate(BaseModel):
     client_id: str
     scenario_key: str
+    demo_session_id: str | None = Field(default=None, max_length=128)
     service_type: str | None = None
     language_pair: str | None = None
     page_count: str | None = None
@@ -48,6 +49,7 @@ class LeadResponse(BaseModel):
     id: int
     client_id: str
     scenario_key: str
+    demo_session_id: str | None
     service_type: str | None
     language_pair: str | None
     page_count: str | None
