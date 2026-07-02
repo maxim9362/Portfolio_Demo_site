@@ -1,5 +1,17 @@
 # Этот файл содержит SSE-маршрут потокового AI-чата.
 
+"""Streaming chat API for the AI Site Consultant demo.
+
+The endpoint receives widget messages, builds a response through the chat
+service and LLM client, and streams Server-Sent Events back to the browser.
+"""
+
+"""Streaming chat API for the AI Site Consultant demo.
+
+The endpoint receives widget messages, builds a response through the chat
+service and LLM client, and streams Server-Sent Events back to the browser.
+"""
+
 import json
 import logging
 from collections.abc import AsyncIterator
@@ -33,7 +45,7 @@ async def chat(
     """Принимает сообщение пользователя и возвращает поток SSE."""
     try:
         llm_client = LLMClient(
-            api_key=settings.gemini_api_key,
+            api_key=settings.gemini_api_key_list,
             model=settings.gemini_model,
             fallback_model=settings.gemini_fallback_model,
         )
@@ -79,6 +91,7 @@ async def _as_sse(
 ) -> AsyncIterator[str]:
     """Преобразует фрагменты ответа сервиса в события SSE."""
     try:
+        yield _sse_event("typing", {})
         async for chunk in answer_stream:
             yield _sse_event("token", {"text": chunk})
         yield _sse_event("done", {})

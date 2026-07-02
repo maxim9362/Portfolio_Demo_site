@@ -48,3 +48,6 @@
     document.querySelectorAll("[data-typing-cycle]").forEach(cycleText);
   });
 })();
+/*
+  Hero typing/cycling text helper for the marketing pages.
+*/

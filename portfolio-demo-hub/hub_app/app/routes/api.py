@@ -1,3 +1,5 @@
+"""JSON API routes for leads, analytics events, and demo session lifecycle."""
+
 import re
 from typing import Any
 from urllib.error import HTTPError, URLError
@@ -17,10 +19,14 @@ from app.services.analytics import KNOWN_EVENTS, finish_demo_session, record_eve
 from app.services.project_loader import get_project
 
 router = APIRouter(prefix="/api")
+
+# Only Hub-created demo IDs may be used for cleanup calls to demo projects.
 DEMO_SESSION_ID_RE = re.compile(r"^demo_[0-9a-f]{32}$")
 
 
 class ContactPayload(BaseModel):
+    """Payload from the public contact form."""
+
     name: str = Field(min_length=1)
     phone: str | None = None
     email: str | None = None
@@ -32,6 +38,8 @@ class ContactPayload(BaseModel):
 
 
 class AnalyticsPayload(BaseModel):
+    """Generic event payload sent by analytics.js and launch.js."""
+
     event_type: str
     session_id: str | None = None
     demo_session_id: str | None = None
@@ -48,6 +56,8 @@ class AnalyticsPayload(BaseModel):
 
 
 class HeartbeatPayload(BaseModel):
+    """Periodic visitor/demo activity update."""
+
     session_id: str
     demo_session_id: str | None = None
     project_id: str | None = None
@@ -55,17 +65,22 @@ class HeartbeatPayload(BaseModel):
 
 
 class DemoSessionStartPayload(BaseModel):
+    """Request body used when the launch wrapper starts or resets a demo."""
+
     session_id: str | None = None
     previous_demo_session_id: str | None = None
     page_url: str | None = None
 
 
 class DemoSessionFinishPayload(BaseModel):
+    """Optional project hint sent when a wrapper finishes a demo session."""
+
     project_id: str | None = None
 
 
 @router.post("/contact")
 def submit_contact(payload: ContactPayload, request: Request, db: Session = Depends(get_db)) -> dict[str, Any]:
+    """Validate and save a lead, then record the matching contact_submit event."""
     if not payload.name.strip():
         raise HTTPException(status_code=422, detail="Name is required")
     if not (payload.phone and payload.phone.strip()) and not (payload.email and payload.email.strip()):
@@ -88,6 +103,7 @@ def submit_contact(payload: ContactPayload, request: Request, db: Session = Depe
 
 @router.post("/analytics/event")
 def analytics_event(payload: AnalyticsPayload, request: Request, db: Session = Depends(get_db)) -> dict[str, bool]:
+    """Store one explicit analytics event from the browser."""
     record_event(
         db,
         payload.event_type,
@@ -104,6 +120,7 @@ def analytics_event(payload: AnalyticsPayload, request: Request, db: Session = D
 
 @router.post("/analytics/heartbeat")
 def analytics_heartbeat(payload: HeartbeatPayload, request: Request, db: Session = Depends(get_db)) -> dict[str, bool]:
+    """Store a heartbeat event and refresh session last-seen timestamps."""
     record_event(
         db,
         "heartbeat",
@@ -124,6 +141,7 @@ def demo_start(
     request: Request,
     db: Session = Depends(get_db),
 ) -> dict[str, str]:
+    """Create a new isolated demo session for a project launch wrapper."""
     project = get_project(project_id)
     if not project or not project.get("has_demo"):
         raise HTTPException(status_code=404, detail="Demo not found")
@@ -166,6 +184,7 @@ def demo_finish(
     payload: DemoSessionFinishPayload | None = None,
     db: Session = Depends(get_db),
 ) -> dict[str, bool]:
+    """Finish a Hub demo session and ask the underlying demo project to clean up."""
     demo = finish_demo_session(db, demo_session_id)
     if not demo:
         raise HTTPException(status_code=404, detail="Demo session not found")
@@ -185,6 +204,7 @@ def demo_finish(
 
 
 def _cleanup_demo_project(project_id: str | None, demo_session_id: str) -> bool:
+    """Call the demo project's DELETE endpoint to remove per-session demo data."""
     if not project_id:
         return False
     if not DEMO_SESSION_ID_RE.fullmatch(demo_session_id):
@@ -215,6 +235,7 @@ def _cleanup_demo_project(project_id: str | None, demo_session_id: str) -> bool:
 
 
 def _is_allowed_cleanup_url(cleanup_url: str, base_url: str) -> bool:
+    """Allow cleanup calls only to relative URLs or the configured internal base."""
     cleanup_parts = urlparse(cleanup_url)
     if not cleanup_parts.scheme and not cleanup_parts.netloc:
         return cleanup_url.startswith("/")

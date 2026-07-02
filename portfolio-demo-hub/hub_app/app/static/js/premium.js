@@ -26,7 +26,58 @@
     });
   }
 
+  function initMobileMenu() {
+    var toggle = document.querySelector(".mobile-menu-toggle");
+    var nav = document.querySelector(".main-nav");
+    var backdrop = document.querySelector(".mobile-nav-backdrop");
+    var closeNodes = document.querySelectorAll("[data-menu-close]");
+
+    if (!toggle || !nav || !backdrop) {
+      return;
+    }
+
+    function openMenu() {
+      backdrop.hidden = false;
+      document.body.classList.add("nav-open");
+      toggle.setAttribute("aria-expanded", "true");
+    }
+
+    function closeMenu() {
+      document.body.classList.remove("nav-open");
+      toggle.setAttribute("aria-expanded", "false");
+      window.setTimeout(function () {
+        if (!document.body.classList.contains("nav-open")) {
+          backdrop.hidden = true;
+        }
+      }, 260);
+    }
+
+    toggle.addEventListener("click", function () {
+      if (document.body.classList.contains("nav-open")) {
+        closeMenu();
+        return;
+      }
+      openMenu();
+    });
+
+    closeNodes.forEach(function (node) {
+      node.addEventListener("click", closeMenu);
+    });
+
+    nav.querySelectorAll("a").forEach(function (link) {
+      link.addEventListener("click", closeMenu);
+    });
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
+        closeMenu();
+      }
+    });
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
+    initMobileMenu();
+
     attachTilt(document.querySelector(".hero-console"), 4);
 
     document.querySelectorAll(".product-card").forEach(function (card) {
@@ -34,3 +85,7 @@
     });
   });
 })();
+/*
+  Small premium UI effects for the public site.
+  Keeps visual polish client-side without changing backend behavior.
+*/

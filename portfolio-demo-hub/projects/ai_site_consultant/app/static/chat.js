@@ -257,6 +257,16 @@ form.addEventListener("submit", async (event) => {
     submitButton.disabled = true;
 
     let assistantMessage = null;
+    let typingTimer = null;
+
+    function ensureTypingMessage() {
+        if (!assistantMessage) {
+            assistantMessage = addTypingMessage();
+        }
+        return assistantMessage;
+    }
+
+    typingTimer = window.setTimeout(ensureTypingMessage, 300);
 
     try {
         const response = await fetch("/api/chat", {
@@ -277,8 +287,8 @@ form.addEventListener("submit", async (event) => {
             );
         }
 
-        assistantMessage = addTypingMessage();
-        const animator = createTextAnimator(assistantMessage);
+        window.clearTimeout(typingTimer);
+        const animator = createTextAnimator(ensureTypingMessage());
         await streamResponse(response, animator);
 
         if (!animator.hasText()) {
@@ -298,6 +308,9 @@ form.addEventListener("submit", async (event) => {
             addMessage(errorText, "assistant", true);
         }
     } finally {
+        if (typingTimer) {
+            window.clearTimeout(typingTimer);
+        }
         input.disabled = false;
         submitButton.disabled = false;
         input.focus();

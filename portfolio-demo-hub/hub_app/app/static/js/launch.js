@@ -1,3 +1,9 @@
+/*
+  Demo launch wrapper controller.
+  Switches the iframe between demo/admin views, starts fresh demo sessions,
+  tracks launch events, and finishes/cleans up demo data when the user exits.
+*/
+
 (function () {
   const body = document.body;
   const frame = document.getElementById("demo-frame");

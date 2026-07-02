@@ -1,5 +1,19 @@
 # Этот файл загружает настройки приложения из переменных окружения и файла .env.
 
+"""Configuration for the isolated AI Site Consultant demo service.
+
+Settings are loaded from the demo project's own environment, not from the Hub,
+so this project can keep its database, LLM keys, admin settings, and retention
+rules separate while still launching through Portfolio Demo Hub.
+"""
+
+"""Configuration for the isolated AI Site Consultant demo service.
+
+Settings are loaded from the demo project's own environment, not from the Hub,
+so this project can keep its database, LLM keys, admin settings, and retention
+rules separate while still launching through Portfolio Demo Hub.
+"""
+
 from functools import lru_cache
 from pathlib import Path
 
@@ -24,6 +38,7 @@ class Settings(BaseSettings):
 
     database_url: str = "postgresql+psycopg://postgres:postgres@localhost:5432/ai_consultant"
     gemini_api_key: str = ""
+    gemini_api_keys: str = ""
     gemini_model: str = "gemini-3.5-flash"
     gemini_fallback_model: str = "gemini-2.5-flash"
     embedding_model_name: str = (
@@ -68,6 +83,19 @@ class Settings(BaseSettings):
             for origin in self.allowed_origins.split(",")
             if origin.strip()
         ]
+
+    @property
+    def gemini_api_key_list(self) -> list[str]:
+        """Возвращает основной и резервные Gemini API keys без дублей."""
+        raw_keys = [self.gemini_api_key, *self.gemini_api_keys.split(",")]
+        keys: list[str] = []
+        seen: set[str] = set()
+        for raw_key in raw_keys:
+            key = raw_key.strip()
+            if key and key not in seen:
+                keys.append(key)
+                seen.add(key)
+        return keys
 
     @model_validator(mode="after")
     def validate_admin_session_secret(self) -> "Settings":

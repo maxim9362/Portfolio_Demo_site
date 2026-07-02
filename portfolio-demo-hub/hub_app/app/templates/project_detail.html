@@ -1,7 +1,8 @@
+{# Project detail landing page: media, value proposition, feature lists, and CTA links. #}
 {% extends "base.html" %}
-{% block title %}{{ project.title }} — Maxim AI Automation{% endblock %}
+{% block title %}{{ project.title }} — демо для бизнеса{% endblock %}
 {% block meta_description %}{{ meta_description }}{% endblock %}
-{% block og_title %}{{ project.title }} — Maxim AI Automation{% endblock %}
+{% block og_title %}{{ project.title }} — демо для бизнеса{% endblock %}
 {% block og_description %}{{ meta_description }}{% endblock %}
 {% block content %}
 <section class="project-hero">
@@ -17,12 +18,18 @@
         <a class="button primary large" data-launch-link data-track-event="project_demo_button_click" href="/launch/{{ project.id }}">{{ project.cta_text }}</a>
       {% endif %}
       <a class="button large" href="/contact?project_id={{ project.id }}" data-track-event="contact_button_click">{{ project.contact_cta_text }}</a>
-      <a class="button large" href="/projects">Назад ко всем проектам</a>
+      <a class="button large" href="/projects">Назад к проектам</a>
     </div>
     <p class="muted">{{ project.price_note }}</p>
   </div>
   <div class="project-hero-media-wrap">
-    {% if project.preview_image %}
+    {% if project.video_url and project.video_url.endswith(".mp4") %}
+      <video class="project-hero-media project-hero-video" autoplay muted loop playsinline preload="metadata"{% if project.preview_image %} poster="{{ project.preview_image }}"{% endif %}>
+        <source src="{{ project.video_url }}" type="video/mp4">
+      </video>
+    {% elif project.video_url %}
+      <iframe class="project-hero-media project-hero-video" title="{{ project.title }} video" src="{{ project.video_url }}" allow="autoplay; fullscreen" allowfullscreen></iframe>
+    {% elif project.preview_image %}
       <img class="project-hero-media" src="{{ project.preview_image }}" alt="{{ project.title }}" loading="lazy" decoding="async" onerror="this.hidden=true; this.nextElementSibling.hidden=false;">
       <div class="project-hero-media placeholder" hidden>
         <span>{{ project.short_title }}</span>
@@ -35,74 +42,75 @@
   </div>
 </section>
 
-<section class="section">
-  {% if project.video_url %}
-    <div class="media-placeholder video-frame">
-      {% if project.video_url.endswith(".mp4") %}
-        <video controls autoplay muted playsinline preload="metadata"{% if project.preview_image %} poster="{{ project.preview_image }}"{% endif %}>
-          <source src="{{ project.video_url }}" type="video/mp4">
-        </video>
-      {% else %}
-        <iframe title="{{ project.title }} video" src="{{ project.video_url }}" allow="autoplay; fullscreen" allowfullscreen></iframe>
-      {% endif %}
-    </div>
-  {% else %}
-    <div class="video-placeholder">
-      <span class="play-mark">▶</span>
-      <strong>Видео будет добавлено позже</strong>
-      <p>Пока можно открыть live demo, пройти сценарий вручную и посмотреть demo admin.</p>
-    </div>
-  {% endif %}
-</section>
-
 <section class="detail-content full">
   <section>
-    <p class="eyebrow">Описание</p>
-    <h2>Что делает проект</h2>
+    <p class="eyebrow">Что это</p>
+    <h2>Инструмент, который помогает получить более понятную заявку.</h2>
     <p>{{ project.full_description }}</p>
   </section>
-  <section class="two-panel">
-    <div>
-      <p class="eyebrow">Клиент</p>
-      <h2>Что видит посетитель</h2>
-      <p>{{ project.client_side_description }}</p>
-    </div>
-    <div>
-      <p class="eyebrow">Бизнес</p>
-      <h2>Что получает владелец</h2>
-      <p>{{ project.owner_side_description }}</p>
-    </div>
-  </section>
+
   <section>
-    <p class="eyebrow">Польза</p>
-    <h2>Польза для бизнеса</h2>
+    <p class="eyebrow">Какие задачи решает</p>
+    <h2>Меньше ручных уточнений, больше ясности в обращениях.</h2>
     <ul class="check-list columns">
       {% for item in project.business_value %}
         <li>{{ item }}</li>
       {% endfor %}
     </ul>
   </section>
+
+  <section class="two-panel">
+    <div>
+      <p class="eyebrow">Для посетителя</p>
+      <h2>Что видит клиент</h2>
+      <p>{{ project.client_side_description }}</p>
+    </div>
+    <div>
+      <p class="eyebrow">Для владельца</p>
+      <h2>Что получает бизнес</h2>
+      <p>{{ project.owner_side_description }}</p>
+    </div>
+  </section>
+
   <section>
-    <p class="eyebrow">Функции</p>
-    <h2>Что входит</h2>
+    <p class="eyebrow">Как работает</p>
+    <h2>Простой путь от вопроса до заявки.</h2>
+    <div class="workflow">
+      <article><span>01</span><h3>Клиент начинает</h3><p>Посетитель задаёт вопрос или проходит короткий сценарий на сайте.</p></article>
+      <article><span>02</span><h3>Система уточняет</h3><p>Инструмент собирает детали, которые нужны владельцу для обработки заявки.</p></article>
+      <article><span>03</span><h3>Заявка сохраняется</h3><p>В админке видно контакты, содержание обращения и дальнейший статус.</p></article>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Что входит</p>
+    <h2>Функции, которые можно показать в демо.</h2>
     <div class="tag-row large">
       {% for item in project.features %}
         <span>{{ item }}</span>
       {% endfor %}
     </div>
   </section>
+
   <section>
-    <p class="eyebrow">Ниши</p>
-    <h2>Для каких ниш подходит</h2>
+    <p class="eyebrow">Для каких бизнесов подходит</p>
+    <h2>Решение можно адаптировать под разные услуги.</h2>
     <div class="tag-row large">
       {% for item in project.target_niches %}
         <span>{{ item }}</span>
       {% endfor %}
     </div>
   </section>
+
   <section>
-    <p class="eyebrow">Технологии</p>
-    <h2>Tech stack</h2>
+    <p class="eyebrow">Что можно адаптировать</p>
+    <h2>Тексты, вопросы, услуги, внешний вид и логику заявки.</h2>
+    <p>Демо показывает базовый сценарий. В реальном проекте можно заменить нишу, услуги, вопросы, тексты, язык, оформление и структуру заявки под конкретный бизнес.</p>
+  </section>
+
+  <section>
+    <p class="eyebrow">Технологии проекта</p>
+    <h2>Техническая часть вынесена отдельно.</h2>
     <div class="tag-row large tech">
       {% for item in project.tech_stack %}
         <span>{{ item }}</span>
@@ -129,14 +137,14 @@
 
 <section class="cta-band">
   <div>
-    <p class="eyebrow">Готовы проверить?</p>
-    <h2>Запустите демо или обсудите адаптацию под свою нишу</h2>
+    <p class="eyebrow">Следующий шаг</p>
+    <h2>Запустите демо или обсудите адаптацию под вашу нишу.</h2>
   </div>
   <div class="actions">
     {% if project.has_demo %}
       <a class="button primary large" data-launch-link data-track-event="project_demo_button_click" href="/launch/{{ project.id }}">{{ project.cta_text }}</a>
     {% endif %}
-    <a class="button large" href="/contact?project_id={{ project.id }}" data-track-event="contact_button_click">Связаться по проекту</a>
+    <a class="button large" href="/contact?project_id={{ project.id }}" data-track-event="contact_button_click">Обсудить адаптацию</a>
   </div>
 </section>
 {% endblock %}

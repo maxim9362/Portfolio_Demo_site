@@ -1,3 +1,10 @@
+"""Database tables owned by Portfolio Demo Hub.
+
+The Hub stores public contact leads, visitor sessions, analytics events,
+and wrapper-level demo sessions. Individual demo projects may have their own
+separate databases and models.
+"""
+
 from datetime import datetime
 
 from sqlalchemy import Boolean, DateTime, Integer, String, Text, func
@@ -7,6 +14,8 @@ from app.db.database import Base
 
 
 class ContactLead(Base):
+    """A submitted contact form lead from the portfolio site."""
+
     __tablename__ = "contact_leads"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
@@ -23,6 +32,8 @@ class ContactLead(Base):
 
 
 class VisitorSession(Base):
+    """One browser visitor tracked by the Hub analytics script."""
+
     __tablename__ = "visitor_sessions"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
@@ -37,6 +48,8 @@ class VisitorSession(Base):
 
 
 class AnalyticsEvent(Base):
+    """Append-only analytics event such as page views, clicks, and demo actions."""
+
     __tablename__ = "analytics_events"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
@@ -50,6 +63,8 @@ class AnalyticsEvent(Base):
 
 
 class DemoSession(Base):
+    """A single launch of a demo project inside the Hub iframe wrapper."""
+
     __tablename__ = "demo_sessions"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)

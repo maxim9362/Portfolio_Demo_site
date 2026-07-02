@@ -749,6 +749,16 @@
             messageInput.disabled = true;
             sendButton.disabled = true;
             let assistantMessage = null;
+            let typingTimer = null;
+
+            function ensureTypingMessage() {
+                if (!assistantMessage) {
+                    assistantMessage = addTypingMessage();
+                }
+                return assistantMessage;
+            }
+
+            typingTimer = window.setTimeout(ensureTypingMessage, 300);
 
             try {
                 const chatResponse = await fetch(chatEndpoint, {
@@ -765,8 +775,8 @@
                     throw new Error(`Backend returned ${chatResponse.status}`);
                 }
 
-                assistantMessage = addTypingMessage();
-                const textAnimator = createTextAnimator(assistantMessage);
+                window.clearTimeout(typingTimer);
+                const textAnimator = createTextAnimator(ensureTypingMessage());
                 await readStreamingResponse(chatResponse, textAnimator);
                 if (!textAnimator.hasText()) {
                     assistantMessage.parentElement.remove();
@@ -787,6 +797,9 @@
                     addMessage(errorText, "assistant", true);
                 }
             } finally {
+                if (typingTimer) {
+                    window.clearTimeout(typingTimer);
+                }
                 messageInput.disabled = false;
                 sendButton.disabled = false;
                 messageInput.focus();

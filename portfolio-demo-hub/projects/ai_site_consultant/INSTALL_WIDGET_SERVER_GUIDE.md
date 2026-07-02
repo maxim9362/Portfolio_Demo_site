@@ -37,7 +37,7 @@ PostgreSQL + ChromaDB + Gemini + админка /admin
 - `/health` возвращает `{"status": "ok"}`;
 - админка открывается по адресу `/admin`;
 - виджет открывается по адресу `/widget/chat-widget.js`;
-- в `.env` указан `GEMINI_API_KEY`;
+- в `.env` указан `GEMINI_API_KEY`, а резервные ключи при необходимости добавлены в `GEMINI_API_KEYS`;
 - в `.env` указан домен сайта клиента в `ALLOWED_ORIGINS`;
 - backend работает по HTTPS, если сайт клиента тоже HTTPS;
 - создан временный логин и пароль для админки.
@@ -172,7 +172,8 @@ UVICORN_WORKERS=1
 
 DATABASE_URL=postgresql+psycopg://postgres:postgres@localhost:5432/ai_consultant
 
-GEMINI_API_KEY=ваш_gemini_api_key
+GEMINI_API_KEY=ваш_основной_gemini_api_key
+GEMINI_API_KEYS=резервный_key_2,резервный_key_3
 GEMINI_MODEL=gemini-3.5-flash
 GEMINI_FALLBACK_MODEL=gemini-2.5-flash
 
@@ -202,7 +203,7 @@ EMAIL_TO=client@example.com
 
 Важно:
 
-- `GEMINI_API_KEY` обязателен для ответов AI.
+- `GEMINI_API_KEY` обязателен для ответов AI. `GEMINI_API_KEYS` можно заполнить резервными ключами через запятую.
 - `ALLOWED_ORIGINS` должен содержать домен сайта клиента.
 - `EMAIL_TO` - почта клиента, куда приходят заявки.
 - `SMTP_HOST`, `SMTP_USER`, `SMTP_PASSWORD`, `EMAIL_FROM` можно оставить пустыми, если email-уведомления пока не настроены.
@@ -507,7 +508,7 @@ docker compose up -d --build
 | Проблема | Что проверить |
 | --- | --- |
 | Чат не появился на сайте | Открывается ли `/widget/chat-widget.js`, правильно ли вставлен script, очищен ли кэш сайта. |
-| Чат появился, но AI не отвечает | Проверить `GEMINI_API_KEY`, `ALLOWED_ORIGINS`, HTTPS и логи backend. |
+| Чат появился, но AI не отвечает | Проверить `GEMINI_API_KEY`, `GEMINI_API_KEYS`, `ALLOWED_ORIGINS`, HTTPS и логи backend. |
 | Браузер блокирует запросы | Сайт и backend должны быть по HTTPS, домен сайта должен быть в `ALLOWED_ORIGINS`. |
 | В WordPress не видно изменений | Очистить кэш WordPress, кэш плагина, CDN-кэш, открыть сайт в инкогнито. |
 | Заявка не появляется в админке | Проверить PostgreSQL, логи backend, `/admin/leads`, корректность работы `/api/chat`. |

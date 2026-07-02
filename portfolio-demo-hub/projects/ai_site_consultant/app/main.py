@@ -1,5 +1,19 @@
 # Этот файл создает FastAPI-приложение и подключает API и статический интерфейс.
 
+"""Universal AI Site Consultant demo application.
+
+Runs as an isolated FastAPI service behind Portfolio Hub nginx routes.
+It owns its own database, admin area, chat API, widget/static assets,
+and demo-session cleanup endpoint.
+"""
+
+"""Universal AI Site Consultant demo application.
+
+Runs as an isolated FastAPI service behind Portfolio Hub nginx routes.
+It owns its own database, admin area, chat API, widget/static assets,
+and demo-session cleanup endpoint.
+"""
+
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path

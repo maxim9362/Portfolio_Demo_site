@@ -60,3 +60,7 @@
     });
   });
 })();
+/*
+  Scroll reveal helper.
+  Adds visible states to marked sections as they enter the viewport.
+*/

@@ -1,5 +1,19 @@
 # Creates the FastAPI application, initializes the database, and connects API routers.
 
+"""Smart Lead Form demo application.
+
+Runs as an isolated FastAPI service behind Portfolio Hub nginx routes.
+It owns its own database, admin API, public widget, and cleanup endpoint for
+per-demo-session form data.
+"""
+
+"""Smart Lead Form demo application.
+
+Runs as an isolated FastAPI service behind Portfolio Hub nginx routes.
+It owns its own database, admin API, public widget, and cleanup endpoint for
+per-demo-session form data.
+"""
+
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 import logging

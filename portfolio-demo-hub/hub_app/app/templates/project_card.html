@@ -19,15 +19,20 @@
   </div>
   <h3>{{ project.title }}</h3>
   <p>{{ project.short_description }}</p>
+  <div class="card-note">
+    <strong>Подходит для:</strong>
+    <span>{{ project.target_niches[:3] | join(", ") }}</span>
+  </div>
   <div class="tag-row niches">
-    {% for item in project.target_niches[:4] %}
+    {% for item in project.features[:3] %}
       <span>{{ item }}</span>
     {% endfor %}
   </div>
   <div class="card-actions">
+    <a class="button small" href="/projects/{{ project.id }}">Подробнее</a>
     {% if project.has_demo %}
       <a class="button small primary" data-demo-link data-project-id="{{ project.id }}" href="/launch/{{ project.id }}" data-track-event="project_demo_button_click">{{ project.cta_text }}</a>
     {% endif %}
-    <a class="button small" href="/projects/{{ project.id }}">Подробнее</a>
   </div>
 </article>
+{# Reusable project card partial used by the home page and project catalog. #}

@@ -1,5 +1,9 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json
+# Dev compose: поднимает локально Portfolio Hub, nginx и два реальных demo project.
+# В отличие от production compose здесь оставлены простые пароли и localhost-friendly настройки.
 services:
   postgres:
+    # Основная база Portfolio Hub: заявки, аналитика, visitor/demo sessions.
     image: postgres:16-alpine
     environment:
       POSTGRES_DB: portfolio
@@ -17,6 +21,7 @@ services:
       retries: 20
 
   portfolio_hub:
+    # Основной сайт-портфолио и админка Hub.
     build:
       context: ./hub_app
     env_file:
@@ -32,6 +37,7 @@ services:
       - "8000"
 
   ai_site_consultant_postgres:
+    # Отдельная база реального AI Chat demo, чтобы данные проекта не смешивались с Hub.
     image: postgres:16-alpine
     environment:
       POSTGRES_DB: ai_consultant
@@ -48,6 +54,7 @@ services:
       retries: 20
 
   ai_site_consultant:
+    # Реальный AI Site Consultant demo project.
     build:
       context: ./projects/ai_site_consultant
     env_file:
@@ -66,6 +73,7 @@ services:
       - "8000"
 
   smart_lead_form_postgres:
+    # Отдельная база Smart Lead Form demo.
     image: postgres:16-alpine
     environment:
       POSTGRES_DB: smart_lead_form
@@ -82,6 +90,7 @@ services:
       retries: 20
 
   smart_lead_form:
+    # Реальный Smart Lead Form demo project.
     build:
       context: ./projects/smart_lead_form
     env_file:
@@ -97,6 +106,7 @@ services:
       - "8000"
 
   nginx:
+    # Единая внешняя точка входа: сайт, demo routes, admin-demo routes и project assets.
     image: nginx:1.27-alpine
     ports:
       - "80:80"

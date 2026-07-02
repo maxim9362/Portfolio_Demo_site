@@ -1,5 +1,6 @@
 # Этот файл собирает production-контейнер FastAPI-приложения на Python 3.12.
 
+# Builds the isolated AI Site Consultant demo container.
 FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \

@@ -1,3 +1,4 @@
+{# Demo wrapper page: fixed control bar plus iframe for demo/admin views. #}
 <!doctype html>
 <html lang="ru">
 <head>
@@ -29,8 +30,9 @@
     </div>
     {% if project.admin_demo_credentials %}
       <div class="launch-credentials" aria-label="Доступ в demo admin">
-        <span>Admin demo</span>
+        <span>логин</span>
         <code>{{ project.admin_demo_credentials.username }}</code>
+        <span>пароль</span>
         <code>{{ project.admin_demo_credentials.password }}</code>
       </div>
     {% endif %}

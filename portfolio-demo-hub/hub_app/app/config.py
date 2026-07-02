@@ -1,3 +1,9 @@
+"""Environment-driven settings for Portfolio Demo Hub.
+
+Values come from `.env` in local development and from real environment
+variables in Docker/production. Defaults match the development compose setup.
+"""
+
 from functools import lru_cache
 from pathlib import Path
 
@@ -9,6 +15,8 @@ load_dotenv()
 
 
 class Settings(BaseSettings):
+    """Typed application settings shared by routes, services, and startup code."""
+
     database_url: str = Field(
         "postgresql+psycopg://portfolio:portfolio@postgres:5432/portfolio",
         alias="DATABASE_URL",
@@ -31,4 +39,5 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
+    """Return one cached Settings instance instead of reparsing env on every call."""
     return Settings()

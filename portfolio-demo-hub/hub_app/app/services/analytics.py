@@ -1,3 +1,9 @@
+"""Analytics service functions shared by public APIs and admin metrics.
+
+This module updates visitor/demo session timing and records every event in one
+place, so routes do not duplicate tracking logic.
+"""
+
 import hashlib
 import json
 from datetime import UTC, datetime
@@ -28,16 +34,19 @@ KNOWN_EVENTS = {
 
 
 def now_utc() -> datetime:
+    """Use timezone-aware UTC timestamps consistently across analytics tables."""
     return datetime.now(UTC)
 
 
 def hash_ip(ip: str | None) -> str | None:
+    """Hash visitor IPs before storage so analytics do not keep raw addresses."""
     if not ip:
         return None
     return hashlib.sha256(ip.encode("utf-8")).hexdigest()
 
 
 def get_or_create_visitor_session(db: Session, session_id: str, request: Request | None = None) -> VisitorSession:
+    """Return the existing visitor session or create it on the first event."""
     visitor = db.query(VisitorSession).filter(VisitorSession.session_id == session_id).one_or_none()
     if visitor:
         return visitor
@@ -63,6 +72,7 @@ def record_event(
     metadata: dict[str, Any] | None = None,
     request: Request | None = None,
 ) -> AnalyticsEvent:
+    """Record one analytics event and update related session timing fields."""
     timestamp = now_utc()
     if session_id:
         visitor = get_or_create_visitor_session(db, session_id, request)
@@ -103,6 +113,7 @@ def record_event(
 
 
 def finish_demo_session(db: Session, demo_session_id: str) -> DemoSession | None:
+    """Mark a demo session as finished and calculate its duration."""
     demo = db.query(DemoSession).filter(DemoSession.demo_session_id == demo_session_id).one_or_none()
     if not demo:
         return None

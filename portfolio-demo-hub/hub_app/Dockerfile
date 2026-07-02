@@ -1,3 +1,5 @@
+# Builds the main Portfolio Hub FastAPI container.
+# Builds the main Portfolio Hub FastAPI container.
 FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1

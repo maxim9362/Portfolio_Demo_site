@@ -1,5 +1,9 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json
+# Production compose: запуск на сервере с restart policy, env_file и persistent volumes.
+# Перед запуском обязательно заменить секреты в .env и env-файлах demo projects.
 services:
   postgres:
+    # Production-база Portfolio Hub.
     image: postgres:16-alpine
     restart: unless-stopped
     env_file:
@@ -20,6 +24,7 @@ services:
       retries: 20
 
   portfolio_hub:
+    # Основной публичный сайт и закрытая админка Hub.
     build:
       context: ./hub_app
     restart: unless-stopped
@@ -37,6 +42,7 @@ services:
       - "8000"
 
   ai_site_consultant_postgres:
+    # Production-база AI Site Consultant demo.
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
@@ -54,6 +60,7 @@ services:
       retries: 20
 
   ai_site_consultant:
+    # Контейнер реального AI Chat demo; код не заменяется заглушкой.
     build:
       context: ./projects/ai_site_consultant
     restart: unless-stopped
@@ -72,6 +79,7 @@ services:
       - "8000"
 
   smart_lead_form_postgres:
+    # Production-база Smart Lead Form demo.
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
@@ -89,6 +97,7 @@ services:
       retries: 20
 
   smart_lead_form:
+    # Контейнер реального Smart Lead Form demo.
     build:
       context: ./projects/smart_lead_form
     restart: unless-stopped
@@ -104,6 +113,7 @@ services:
       - "8000"
 
   nginx:
+    # Reverse proxy, который держит внешний порт 80 и направляет трафик к нужному сервису.
     image: nginx:1.27-alpine
     restart: unless-stopped
     ports:

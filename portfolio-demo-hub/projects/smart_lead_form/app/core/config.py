@@ -1,5 +1,9 @@
 # Loads application settings from environment variables.
 
+"""Configuration for the isolated Smart Lead Form demo service."""
+
+"""Configuration for the isolated Smart Lead Form demo service."""
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 

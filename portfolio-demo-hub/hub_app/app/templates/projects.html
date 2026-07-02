@@ -1,13 +1,14 @@
+{# Project catalog page: renders active projects loaded from projects/*/project.json. #}
 {% extends "base.html" %}
-{% block title %}Проекты AI-автоматизации — Maxim AI Automation{% endblock %}
-{% block meta_description %}Интерактивные демо AI/automation проектов: AI-консультант для сайта и Smart Lead Form.{% endblock %}
-{% block og_title %}Проекты AI-автоматизации — Maxim AI Automation{% endblock %}
-{% block og_description %}Интерактивные демо AI/automation проектов: AI-консультант для сайта и Smart Lead Form.{% endblock %}
+{% block title %}Готовые демо-проекты для заявок — AI Automation{% endblock %}
+{% block meta_description %}Рабочие демо AI-консультанта для сайта и умной формы заявки: что видит клиент, что получает владелец и как это можно адаптировать под бизнес.{% endblock %}
+{% block og_title %}Готовые демо-проекты для заявок — AI Automation{% endblock %}
+{% block og_description %}Откройте демо AI-консультанта и умной формы заявки, чтобы понять, как они помогают бизнесу получать более понятные обращения.{% endblock %}
 {% block content %}
 <section class="page-hero">
-  <p class="eyebrow">Каталог demo projects</p>
-  <h1>AI-решения, которые можно открыть и протестировать</h1>
-  <p class="lead">Каждый проект показывает понятный бизнес-сценарий: что видит клиент, что получает владелец и как выглядит demo/admin часть.</p>
+  <p class="eyebrow">Готовые демо-проекты</p>
+  <h1>Решения, которые можно открыть, протестировать и адаптировать под бизнес.</h1>
+  <p class="lead">Каждый проект показывает понятный сценарий: что видит посетитель, какую заявку получает владелец и как инструмент помогает меньше тратить время на ручные уточнения.</p>
 </section>
 
 <section class="section">
@@ -18,5 +19,13 @@
       <p>Проекты пока не добавлены.</p>
     {% endfor %}
   </div>
+</section>
+
+<section class="cta-band">
+  <div>
+    <p class="eyebrow">Не знаете, с чего начать?</p>
+    <h2>Можно обсудить задачу и выбрать: сайт, AI-консультант, умная форма или автоматизация заявок.</h2>
+  </div>
+  <a class="button primary large" href="/contact" data-track-event="contact_button_click">Обсудить задачу</a>
 </section>
 {% endblock %}

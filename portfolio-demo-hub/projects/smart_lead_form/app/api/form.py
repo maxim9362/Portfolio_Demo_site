@@ -1,5 +1,17 @@
 # Exposes endpoints for dynamic form configuration and estimate calculation.
 
+"""Public form API for Smart Lead Form.
+
+Provides dynamic form configuration, step visibility, and estimate calculation
+used by the browser widget.
+"""
+
+"""Public form API for Smart Lead Form.
+
+Provides dynamic form configuration, step visibility, and estimate calculation
+used by the browser widget.
+"""
+
 from fastapi import APIRouter, HTTPException
 
 from app.schemas.calculator import CalculateRequest, CalculateResponse

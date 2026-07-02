@@ -1,3 +1,9 @@
+"""Load portfolio project metadata from `/projects/*/project.json`.
+
+The loader is intentionally defensive: one broken project config is logged and
+skipped so the rest of the portfolio site continues to work.
+"""
+
 import json
 import logging
 from pathlib import Path
@@ -9,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 def _project_dirs(projects_root: Path) -> list[Path]:
+    """Return direct project folders from the configured projects root."""
     if not projects_root.exists():
         logger.warning("Projects root does not exist: %s", projects_root)
         return []
@@ -16,6 +23,7 @@ def _project_dirs(projects_root: Path) -> list[Path]:
 
 
 def load_projects() -> list[dict[str, Any]]:
+    """Read active project configs, normalize small fields, and sort by order."""
     projects: list[dict[str, Any]] = []
     projects_root = get_settings().projects_root
 
@@ -38,6 +46,7 @@ def load_projects() -> list[dict[str, Any]]:
 
 
 def get_project(project_id: str) -> dict[str, Any] | None:
+    """Find one active project by its public id from project.json."""
     for project in load_projects():
         if project.get("id") == project_id:
             return project
@@ -45,6 +54,7 @@ def get_project(project_id: str) -> dict[str, Any] | None:
 
 
 def _is_placeholder_preview(project_dir: Path, preview_image: Any) -> bool:
+    """Detect tiny placeholder preview files so templates can hide broken images."""
     if not isinstance(preview_image, str) or not preview_image:
         return False
     preview_path = project_dir / Path(preview_image).name

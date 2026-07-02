@@ -1,3 +1,5 @@
+"""Protected admin pages for leads, analytics, visitors, demos, and projects."""
+
 import secrets
 from datetime import UTC, datetime
 from typing import Any
@@ -20,6 +22,7 @@ security = HTTPBasic()
 
 
 def require_admin(credentials: HTTPBasicCredentials = Depends(security)) -> str:
+    """Basic Auth dependency used by every admin route."""
     settings = get_settings()
     valid_user = secrets.compare_digest(credentials.username, settings.admin_username)
     valid_password = secrets.compare_digest(credentials.password, settings.admin_password)
@@ -33,6 +36,7 @@ def require_admin(credentials: HTTPBasicCredentials = Depends(security)) -> str:
 
 
 def duration(value: int | None) -> str:
+    """Format seconds into compact human-readable admin labels."""
     if not value:
         return "0s"
     seconds = max(0, int(value))
@@ -46,6 +50,7 @@ def duration(value: int | None) -> str:
 
 
 def demo_duration(item: DemoSession) -> int:
+    """Return stored demo duration or calculate a live duration for active demos."""
     if item.duration_seconds is not None:
         return item.duration_seconds
     if item.started_at:
@@ -55,16 +60,19 @@ def demo_duration(item: DemoSession) -> int:
 
 
 def referer_or(path: str, request: Request) -> str:
+    """Redirect back to the previous admin page after POST actions."""
     return request.headers.get("referer") or path
 
 
 def project_options() -> list[dict[str, Any]]:
+    """Load active project metadata for admin filters and project tables."""
     return load_projects()
 
 
 @router.get("", response_class=HTMLResponse)
 @router.get("/", response_class=HTMLResponse)
 def dashboard(request: Request, _: str = Depends(require_admin), db: Session = Depends(get_db)) -> HTMLResponse:
+    """Admin overview with core portfolio metrics and the latest events."""
     total_page_views = db.query(AnalyticsEvent).filter(AnalyticsEvent.event_type == "page_view").count()
     unique_sessions = db.query(VisitorSession).count()
     leads_count = db.query(ContactLead).count()
@@ -109,6 +117,7 @@ def leads(
     _: str = Depends(require_admin),
     db: Session = Depends(get_db),
 ) -> HTMLResponse:
+    """List contact leads with simple filters for status, project, and client type."""
     query = db.query(ContactLead)
     if status_filter:
         query = query.filter(ContactLead.status == status_filter)
@@ -144,20 +153,24 @@ def leads(
 
 @router.post("/leads/{lead_id}/viewed")
 def lead_viewed(lead_id: int, request: Request, _: str = Depends(require_admin), db: Session = Depends(get_db)) -> RedirectResponse:
+    """Mark a lead as viewed from the leads table."""
     return update_lead_status(lead_id, "viewed", request, db)
 
 
 @router.post("/leads/{lead_id}/archive")
 def lead_archive(lead_id: int, request: Request, _: str = Depends(require_admin), db: Session = Depends(get_db)) -> RedirectResponse:
+    """Archive a lead without deleting it from the database."""
     return update_lead_status(lead_id, "archived", request, db)
 
 
 @router.post("/leads/{lead_id}/restore")
 def lead_restore(lead_id: int, request: Request, _: str = Depends(require_admin), db: Session = Depends(get_db)) -> RedirectResponse:
+    """Restore an archived/viewed lead to the new status."""
     return update_lead_status(lead_id, "new", request, db)
 
 
 def update_lead_status(lead_id: int, new_status: str, request: Request, db: Session) -> RedirectResponse:
+    """Shared status update helper for all lead action buttons."""
     if new_status not in {"new", "viewed", "archived"}:
         raise HTTPException(status_code=400, detail="Invalid lead status")
     lead = db.get(ContactLead, lead_id)
@@ -169,6 +182,7 @@ def update_lead_status(lead_id: int, new_status: str, request: Request, db: Sess
 
 @router.get("/sessions", response_class=HTMLResponse)
 def sessions(request: Request, _: str = Depends(require_admin), db: Session = Depends(get_db)) -> HTMLResponse:
+    """Show visitor sessions enriched with event, demo, project, and lead counts."""
     items = db.query(VisitorSession).order_by(VisitorSession.last_seen_at.desc().nullslast()).limit(300).all()
     session_ids = [item.session_id for item in items]
     event_counts = dict(
@@ -216,6 +230,7 @@ def sessions(request: Request, _: str = Depends(require_admin), db: Session = De
 
 @router.get("/sessions/{session_id}", response_class=HTMLResponse)
 def session_detail(session_id: str, request: Request, _: str = Depends(require_admin), db: Session = Depends(get_db)) -> HTMLResponse:
+    """Show a single visitor journey: pages, projects, demos, events, and leads."""
     visitor = db.query(VisitorSession).filter(VisitorSession.session_id == session_id).one_or_none()
     if not visitor:
         raise HTTPException(status_code=404, detail="Session not found")
@@ -249,6 +264,7 @@ def session_detail(session_id: str, request: Request, _: str = Depends(require_a
 
 @router.get("/analytics", response_class=HTMLResponse)
 def analytics(request: Request, _: str = Depends(require_admin), db: Session = Depends(get_db)) -> HTMLResponse:
+    """Show raw events plus page, project, demo, admin, and conversion summaries."""
     events = db.query(AnalyticsEvent).order_by(AnalyticsEvent.created_at.desc()).limit(300).all()
     popular_pages = (
         db.query(AnalyticsEvent.page_url, func.count(AnalyticsEvent.id).label("count"))
@@ -309,6 +325,7 @@ def demo_sessions(
     _: str = Depends(require_admin),
     db: Session = Depends(get_db),
 ) -> HTMLResponse:
+    """List wrapper-level demo sessions with filters and duration labels."""
     query = db.query(DemoSession)
     if project_id:
         query = query.filter(DemoSession.project_id == project_id)
@@ -330,6 +347,7 @@ def demo_sessions(
 
 @router.get("/demo-sessions/{demo_session_id}", response_class=HTMLResponse)
 def demo_session_detail(demo_session_id: str, request: Request, _: str = Depends(require_admin), db: Session = Depends(get_db)) -> HTMLResponse:
+    """Show one demo launch and all analytics events tied to it."""
     item = db.query(DemoSession).filter(DemoSession.demo_session_id == demo_session_id).one_or_none()
     if not item:
         raise HTTPException(status_code=404, detail="Demo session not found")
@@ -352,10 +370,12 @@ def demo_session_detail(demo_session_id: str, request: Request, _: str = Depends
 
 @router.get("/projects", response_class=HTMLResponse)
 def admin_projects(request: Request, _: str = Depends(require_admin)) -> HTMLResponse:
+    """Show active projects exactly as the public project loader sees them."""
     return templates.TemplateResponse("admin/projects.html", {"request": request, "projects": load_projects()})
 
 
 def _event_counts(db: Session, event_type: str) -> list[tuple[str, int]]:
+    """Return project-level counts for one analytics event type."""
     return [
         (row[0], row[1])
         for row in (

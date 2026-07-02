@@ -1,3 +1,5 @@
+"""Public website routes, SEO helpers, and the demo launch wrapper page."""
+
 from uuid import uuid4
 from xml.sax.saxutils import escape
 
@@ -14,17 +16,21 @@ from app.services.project_loader import get_project, load_projects
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
+
+# Project-specific meta descriptions override short descriptions for SEO snippets.
 PROJECT_META_DESCRIPTIONS = {
-    "ai-site-consultant": "Демо AI-консультанта для сайта: чат отвечает посетителям, объясняет услуги, собирает заявки и показывает владельцу историю общения.",
-    "smart-lead-form": "Демо умной формы заявки: пользователь проходит вопросы, получает пример расчёта и оставляет структурированную заявку.",
+    "ai-site-consultant": "Демо AI-консультанта для сайта: посетитель получает ответы и оставляет заявку, а владелец видит контакты и историю общения.",
+    "smart-lead-form": "Демо умной формы заявки: клиент отвечает на нужные вопросы, а владелец получает понятное структурированное обращение.",
 }
 
 
 def site_url() -> str:
+    """Return the configured public site URL without a trailing slash."""
     return get_settings().site_url.rstrip("/")
 
 
 def absolute_url(path: str | None) -> str | None:
+    """Convert a relative site path into an absolute public URL."""
     if not path:
         return None
     if path.startswith(("http://", "https://")):
@@ -33,6 +39,7 @@ def absolute_url(path: str | None) -> str | None:
 
 
 def public_context(path: str, **extra):
+    """Build shared template context for canonical/Open Graph metadata."""
     canonical_url = absolute_url(path)
     return {
         "canonical_url": canonical_url,
@@ -43,6 +50,7 @@ def public_context(path: str, **extra):
 
 
 def person_schema() -> dict[str, str]:
+    """Structured data that describes the portfolio owner for search engines."""
     return {
         "@context": "https://schema.org",
         "@type": "Person",
@@ -54,6 +62,7 @@ def person_schema() -> dict[str, str]:
 
 
 def service_schema(project: dict) -> dict:
+    """Structured data for one project detail page."""
     return {
         "@context": "https://schema.org",
         "@type": "Service",
@@ -68,6 +77,7 @@ def service_schema(project: dict) -> dict:
 
 
 def contact_channels() -> dict[str, str]:
+    """Normalize contact settings into labels and clickable URLs for templates."""
     settings = get_settings()
     telegram = settings.contact_telegram.lstrip("@")
     whatsapp = "".join(char for char in settings.contact_whatsapp if char.isdigit())
@@ -85,6 +95,7 @@ def contact_channels() -> dict[str, str]:
 
 @router.get("/robots.txt", response_class=Response)
 def robots_txt() -> Response:
+    """Robots file: allow public pages and hide admin/API/launch internals."""
     body = "\n".join(
         [
             "User-agent: *",
@@ -104,6 +115,7 @@ def robots_txt() -> Response:
 
 @router.get("/sitemap.xml", response_class=Response)
 def sitemap_xml() -> Response:
+    """Generate a small sitemap from static pages and active project configs."""
     urls = [
         ("/", "weekly", "1.0"),
         ("/projects", "weekly", "0.9"),
@@ -128,6 +140,7 @@ def sitemap_xml() -> Response:
 
 @router.get("/", response_class=HTMLResponse)
 def index(request: Request) -> HTMLResponse:
+    """Landing page with the main offer and highlighted active projects."""
     return templates.TemplateResponse(
         "index.html",
         public_context(
@@ -141,16 +154,19 @@ def index(request: Request) -> HTMLResponse:
 
 @router.get("/for-partners", response_class=HTMLResponse)
 def for_partners(request: Request) -> HTMLResponse:
+    """Partner-facing page for designers, marketers, SEO specialists, and agencies."""
     return templates.TemplateResponse("for_partners.html", public_context("/for-partners", request=request))
 
 
 @router.get("/projects", response_class=HTMLResponse)
 def projects(request: Request) -> HTMLResponse:
+    """Catalog page that lists active projects from the project loader."""
     return templates.TemplateResponse("projects.html", public_context("/projects", request=request, projects=load_projects()))
 
 
 @router.get("/projects/{project_id}", response_class=HTMLResponse)
 def project_detail(request: Request, project_id: str, db: Session = Depends(get_db)) -> HTMLResponse:
+    """Project detail page with analytics tracking when a session_id is present."""
     project = get_project(project_id)
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
@@ -178,6 +194,7 @@ def launch(
     session_id: str | None = Query(default=None),
     db: Session = Depends(get_db),
 ) -> HTMLResponse:
+    """Create a Hub demo session and render the iframe wrapper for one project."""
     project = get_project(project_id)
     if not project or not project.get("has_demo"):
         raise HTTPException(status_code=404, detail="Demo not found")
@@ -215,6 +232,7 @@ def launch(
 
 @router.get("/contact", response_class=HTMLResponse)
 def contact(request: Request, project_id: str | None = Query(default=None)) -> HTMLResponse:
+    """Contact page with optional project preselection from query parameters."""
     return templates.TemplateResponse(
         "contact.html",
         public_context(

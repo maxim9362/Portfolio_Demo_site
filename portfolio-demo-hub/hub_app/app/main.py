@@ -1,3 +1,10 @@
+"""FastAPI entrypoint for Portfolio Demo Hub.
+
+This module creates the Hub application, connects public pages, JSON APIs,
+protected admin routes, static assets, database table creation, and shared
+HTML/JSON error handling.
+"""
+
 import logging
 
 from fastapi import FastAPI, Request
@@ -21,6 +28,7 @@ templates = Jinja2Templates(directory="app/templates")
 
 @app.on_event("startup")
 def on_startup() -> None:
+    """Validate startup settings, create Hub tables, and print local links."""
     settings = get_settings()
     if settings.app_env.lower() == "production" and settings.admin_password == "change_me":
         raise RuntimeError("ADMIN_PASSWORD must be changed in production")
@@ -48,11 +56,13 @@ def on_startup() -> None:
 
 @app.get("/health")
 def health() -> dict[str, str]:
+    """Small health endpoint for Docker, nginx, and quick browser checks."""
     return {"status": "ok"}
 
 
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    """Return a branded HTML 404 for browsers and JSON errors for API calls."""
     if exc.status_code == 404 and "text/html" in request.headers.get("accept", ""):
         return templates.TemplateResponse(
             "error_404.html",
@@ -66,6 +76,7 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
     )
 
 
+# Routers are kept separate by responsibility: public pages, API endpoints, admin UI.
 app.include_router(pages.router)
 app.include_router(api.router)
 app.include_router(admin.router)

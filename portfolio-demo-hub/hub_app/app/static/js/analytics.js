@@ -1,3 +1,9 @@
+/*
+  Portfolio Hub browser analytics client.
+  Creates a persistent visitor session_id, sends page views, heartbeats,
+  explicit click events, and a best-effort session_end on page unload.
+*/
+
 (function () {
   const SESSION_KEY = "portfolio_demo_hub_session_id";
 

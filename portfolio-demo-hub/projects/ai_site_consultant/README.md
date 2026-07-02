@@ -34,7 +34,8 @@ Copy-Item .env.example .env
 2. Откройте `.env` и заполните минимум:
 
 ```dotenv
-GEMINI_API_KEY=ваш_gemini_api_key
+GEMINI_API_KEY=ваш_основной_gemini_api_key
+GEMINI_API_KEYS=резервный_key_2,резервный_key_3
 ADMIN_SESSION_SECRET=длинная_случайная_строка
 ```
 
@@ -97,6 +98,7 @@ UVICORN_WORKERS=1
 DATABASE_URL=postgresql+psycopg://postgres:postgres@localhost:5432/ai_consultant
 
 GEMINI_API_KEY=
+GEMINI_API_KEYS=
 GEMINI_MODEL=gemini-3.5-flash
 GEMINI_FALLBACK_MODEL=gemini-2.5-flash
 

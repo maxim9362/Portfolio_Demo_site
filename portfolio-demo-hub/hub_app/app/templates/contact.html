@@ -1,31 +1,29 @@
+{# Public contact form: saves leads through /api/contact and includes contact channels. #}
 {% extends "base.html" %}
-{% block title %}Обсудить проект — Maxim AI Automation{% endblock %}
-{% block meta_description %}Оставьте заявку, чтобы обсудить AI-консультанта, умную форму, WhatsApp-бота или адаптацию demo project под бизнес.{% endblock %}
-{% block og_title %}Обсудить проект — Maxim AI Automation{% endblock %}
-{% block og_description %}Оставьте контакт, и мы обсудим подходящий AI-сценарий для сайта, заявок или партнерского проекта.{% endblock %}
+{% block title %}Обсудить сайт или автоматизацию заявок — AI Automation{% endblock %}
+{% block meta_description %}Оставьте заявку, чтобы обсудить сайт, AI-консультанта, умную форму, автоматизацию обработки заявок или партнёрство.{% endblock %}
+{% block og_title %}Обсудить сайт или автоматизацию заявок — AI Automation{% endblock %}
+{% block og_description %}Коротко опишите задачу, и я помогу понять, какое решение подойдёт: сайт, AI-консультант, умная форма или автоматизация заявок.{% endblock %}
 {% block content %}
 <section class="form-shell contact-shell">
   <div class="contact-copy">
     <div class="contact-profile">
       <img class="contact-photo" src="{{ contact.photo_url }}" alt="Maxim" loading="lazy" decoding="async">
       <div>
-        <p class="eyebrow">Maxim AI Automation</p>
-        <h1>Обсудить проект</h1>
+        <p class="eyebrow">AI Automation</p>
+        <h1>Обсудить задачу</h1>
       </div>
     </div>
-    <p class="eyebrow">Заявка</p>
-    <p class="lead">Оставьте контакт, и я свяжусь с вами. Можно обсудить AI-чат, WhatsApp-бота, умную форму заявок или demo/admin часть для клиента.</p>
+    <p class="lead">Здесь можно обсудить сайт для бизнеса, AI-консультанта, умную форму заявки, автоматизацию обработки обращений или партнёрство для клиентского проекта.</p>
     <div class="contact-points">
-      <span>Без email-рассылок</span>
-      <span>Заявка сохраняется в админке</span>
-      <span>Можно указать конкретный проект</span>
+      <span>Можно начать с готового демо и адаптировать его под нишу</span>
+      <span>Форма остаётся простой: достаточно описать задачу своими словами</span>
+      {%<span>WhatsApp-проекты пока в разработке, но их можно обсудить на будущее</span>%}
     </div>
     <div class="contact-direct">
       <p class="eyebrow">Или напишите напрямую</p>
       <div class="contact-channels">
         <a class="button small" href="{{ contact.whatsapp_url }}" target="_blank" rel="noopener">WhatsApp {{ contact.whatsapp_label }}</a>
-        <a class="button small" href="{{ contact.email_url }}">{{ contact.email }}</a>
-        <a class="button small" href="{{ contact.telegram_url }}" target="_blank" rel="noopener">Telegram {{ contact.telegram_label }}</a>
         <a class="text-link" href="{{ contact.facebook_url }}" target="_blank" rel="noopener">Facebook</a>
       </div>
     </div>
@@ -42,7 +40,7 @@
         <input name="email" type="email" autocomplete="email" placeholder="name@example.com">
       </label>
     </div>
-    <label>Тип клиента
+    <label>Кто вы
       <select name="client_type">
         <option value="">Не выбрано</option>
         <option value="business_owner">Владелец бизнеса</option>
@@ -51,16 +49,19 @@
         <option value="other">Другое</option>
       </select>
     </label>
-    <label>Проект
+    <label>Что хотите обсудить
       <select name="project_id">
         <option value="">Общий запрос</option>
+        <option value="business-site">Сайт для бизнеса</option>
         {% for project in projects %}
           <option value="{{ project.id }}" {% if selected_project_id == project.id %}selected{% endif %}>{{ project.title }}</option>
         {% endfor %}
+        <option value="automation">Автоматизация заявок</option>
+        <option value="partnership">Партнёрство</option>
       </select>
     </label>
     <label>Сообщение
-      <textarea name="message" rows="5" placeholder="Коротко опишите задачу или нишу"></textarea>
+      <textarea name="message" rows="5" placeholder="Коротко опишите бизнес, сайт или задачу. Например: хочу, чтобы заявки с сайта приходили более понятными."></textarea>
     </label>
     <input type="hidden" name="source_page" value="{{ request.url }}">
     <button class="button primary large" type="submit">Отправить заявку</button>
@@ -90,7 +91,7 @@
     }
     const data = await response.json().catch(() => ({}));
     statusNode.classList.remove("success");
-    statusNode.textContent = data.detail || "Проверьте имя и телефон или email.";
+    statusNode.textContent = data.detail || "Проверьте имя и телефон.";
   });
 </script>
 {% endblock %}

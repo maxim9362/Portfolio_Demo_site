@@ -1,9 +1,10 @@
+{# Shared public layout: metadata, header navigation, global assets, and footer. #}
 <!doctype html>
 <html lang="ru">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}AI-автоматизация бизнеса — Maxim AI Automation{% endblock %}</title>
+  <title>{% block title %}AI-автоматизация бизнеса — AI Automation{% endblock %}</title>
   <meta name="description" content="{% block meta_description %}AI-консультанты, WhatsApp-боты, умные формы заявок и demo admin для бизнеса.{% endblock %}">
   {% if canonical_url %}
   <link rel="canonical" href="{{ canonical_url }}">
@@ -20,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/css/styles.css">
+  <link rel="stylesheet" href="/static/css/styles.css?v=hero-video-1">
   {% if schema_data %}
   <script type="application/ld+json">{{ schema_data | tojson }}</script>
   {% endif %}
@@ -30,9 +31,15 @@
   <header class="site-header">
     <a class="brand" href="/" aria-label="Maxim AI Automation">
       <span class="brand-mark">M</span>
-      <span>Maxim AI Automation</span>
+      <span>AI Automation</span>
     </a>
-    <nav class="main-nav" aria-label="Основная навигация">
+    <button class="mobile-menu-toggle" type="button" aria-controls="site-navigation" aria-expanded="false">
+      <span class="menu-lines" aria-hidden="true"><i></i><i></i></span>
+      <span>Меню</span>
+    </button>
+    <div class="mobile-nav-backdrop" data-menu-close hidden></div>
+    <nav class="main-nav" id="site-navigation" aria-label="Основная навигация">
+      <button class="mobile-nav-close" type="button" data-menu-close aria-label="Закрыть меню">×</button>
       <a href="/">Главная</a>
       <a href="/projects">Продукты</a>
       <a href="/for-partners">Партнёрам</a>
@@ -45,7 +52,7 @@
   <script src="/static/js/analytics.js"></script>
   <script src="/static/js/reveal.js"></script>
   <script src="/static/js/typing.js"></script>
-  <script src="/static/js/premium.js"></script>
+  <script src="/static/js/premium.js?v=hero-video-1"></script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

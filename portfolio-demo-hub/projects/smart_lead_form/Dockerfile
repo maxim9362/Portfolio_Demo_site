@@ -1,3 +1,4 @@
+# Builds the isolated Smart Lead Form demo container.
 FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1
