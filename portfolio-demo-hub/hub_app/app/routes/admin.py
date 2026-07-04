@@ -3,6 +3,7 @@
 import secrets
 from datetime import UTC, datetime
 from typing import Any
+from urllib.parse import parse_qsl, urlencode, urlparse
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -51,6 +52,49 @@ PROJECT_STATUS_LABELS = {
     "just_researching": "Пока изучает",
 }
 
+EVENT_LABELS = {
+    "page_view": "Просмотр страницы",
+    "partner_page_view": "Просмотр страницы партнёрам",
+    "project_view": "Просмотр проекта",
+    "service_page_view": "Просмотр услуги",
+    "contact_open": "Открыл контакты",
+    "contact_page_view": "Страница контактов",
+    "contact_form_start": "Начал форму",
+    "contact_submit": "Отправка заявки",
+    "contact_submit_success": "Заявка сохранена",
+    "contact_submit_error": "Ошибка в форме",
+    "demo_launch": "Запуск демо",
+    "demo_share_link": "Поделился демо",
+    "demo_tab_open": "Открыл демо",
+    "admin_tab_open": "Открыл админку",
+    "demo_finish": "Завершил демо",
+    "cta_click": "Клик по кнопке",
+    "contact_button_click": "Клик на контакт",
+    "project_demo_button_click": "Клик на запуск демо",
+    "heartbeat": "Активность на странице",
+    "session_end": "Сессия завершена",
+}
+
+EVENT_TONES = {
+    "contact_submit": "lead",
+    "contact_submit_success": "lead",
+    "contact_form_start": "lead",
+    "demo_launch": "demo",
+    "demo_share_link": "demo",
+    "demo_tab_open": "demo",
+    "admin_tab_open": "demo",
+    "demo_finish": "demo",
+    "project_view": "project",
+    "project_demo_button_click": "project",
+    "page_view": "page",
+    "partner_page_view": "page",
+    "service_page_view": "page",
+    "heartbeat": "technical",
+    "session_end": "technical",
+}
+
+NOISY_DASHBOARD_EVENTS = {"heartbeat"}
+
 
 def require_admin(credentials: HTTPBasicCredentials = Depends(security)) -> str:
     """Basic Auth dependency used by every admin route."""
@@ -78,6 +122,169 @@ def duration(value: int | None) -> str:
     if minutes:
         return f"{minutes}m {sec}s"
     return f"{sec}s"
+
+
+def duration_ru(value: int | None) -> str:
+    """Format seconds for human-readable Russian admin labels."""
+    if value is None:
+        return ""
+    seconds = max(0, int(value))
+    if seconds < 10:
+        return "меньше 10 сек"
+    if seconds < 60:
+        return f"{seconds} сек"
+    minutes, sec = divmod(seconds, 60)
+    if minutes < 60:
+        return f"{minutes} мин {sec} сек" if sec else f"{minutes} мин"
+    hours, minutes = divmod(minutes, 60)
+    return f"{hours} ч {minutes} мин" if minutes else f"{hours} ч"
+
+
+def format_datetime(value: datetime | None) -> str:
+    """Format database datetimes into compact labels for admin screens."""
+    if not value:
+        return ""
+    return value.strftime("%d.%m.%Y %H:%M")
+
+
+def time_ago(value: datetime | None) -> str:
+    """Return a short relative time label such as '5 мин назад'."""
+    if not value:
+        return ""
+    current = datetime.now(UTC)
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=UTC)
+    seconds = max(0, int((current - value).total_seconds()))
+    if seconds < 60:
+        return "только что"
+    minutes = seconds // 60
+    if minutes < 60:
+        return f"{minutes} мин назад"
+    hours = minutes // 60
+    if hours < 24:
+        return f"{hours} ч назад"
+    days = hours // 24
+    return f"{days} дн назад"
+
+
+def clean_page_url(page_url: str | None) -> str:
+    """Show only the useful path instead of a full localhost URL."""
+    if not page_url:
+        return ""
+    parsed = urlparse(page_url)
+    path = parsed.path or "/"
+    query_items = [
+        (key, value)
+        for key, value in parse_qsl(parsed.query, keep_blank_values=True)
+        if key not in {"session_id", "demo_session_id"}
+    ]
+    clean_query = urlencode(query_items)
+    return f"{path}?{clean_query}" if clean_query else path
+
+
+def short_id(value: str | None) -> str:
+    """Shorten long technical ids while keeping links useful."""
+    if not value:
+        return ""
+    if len(value) <= 18:
+        return value
+    return f"{value[:14]}..."
+
+
+def time_on_page_seconds(event: AnalyticsEvent, db: Session) -> int | None:
+    """Estimate how long the visitor stayed on this event's page."""
+    if not event.session_id or not event.page_url or not event.created_at:
+        return None
+
+    current_page = clean_page_url(event.page_url)
+    later_events = (
+        db.query(AnalyticsEvent)
+        .filter(AnalyticsEvent.session_id == event.session_id)
+        .filter(AnalyticsEvent.created_at > event.created_at)
+        .order_by(AnalyticsEvent.created_at.asc())
+        .limit(80)
+        .all()
+    )
+
+    end_at: datetime | None = None
+    for later_event in later_events:
+        later_page = clean_page_url(later_event.page_url)
+        if later_event.event_type == "session_end":
+            end_at = later_event.created_at
+            break
+        if later_page and later_page != current_page:
+            end_at = later_event.created_at
+            break
+
+    if end_at is None:
+        visitor = db.query(VisitorSession).filter(VisitorSession.session_id == event.session_id).one_or_none()
+        if visitor:
+            end_at = visitor.ended_at or visitor.last_seen_at
+
+    if not end_at:
+        return None
+    if event.created_at.tzinfo is None:
+        start_at = event.created_at.replace(tzinfo=UTC)
+    else:
+        start_at = event.created_at
+    if end_at.tzinfo is None:
+        end_at = end_at.replace(tzinfo=UTC)
+    return max(0, int((end_at - start_at).total_seconds()))
+
+
+def event_description(event: AnalyticsEvent) -> str:
+    """Translate a raw analytics event into a human-readable sentence."""
+    page = clean_page_url(event.page_url)
+    project = event.project_id or ""
+    if event.event_type in {"page_view", "partner_page_view", "service_page_view"}:
+        return f"Посетитель открыл страницу {page or 'сайта'}."
+    if event.event_type == "project_view":
+        return f"Посетитель смотрел проект {project or page}."
+    if event.event_type == "demo_launch":
+        return f"Посетитель запустил демо {project or 'проекта'}."
+    if event.event_type == "demo_share_link":
+        return f"Посетитель скопировал или отправил ссылку на демо {project or 'проекта'}."
+    if event.event_type == "demo_tab_open":
+        return f"Посетитель переключился на демо {project or 'проекта'}."
+    if event.event_type == "admin_tab_open":
+        return f"Посетитель открыл админку {project or 'проекта'}."
+    if event.event_type == "demo_finish":
+        return f"Посетитель завершил демо {project or 'проекта'}."
+    if event.event_type in {"contact_open", "contact_page_view"}:
+        return "Посетитель открыл страницу контактов."
+    if event.event_type == "contact_form_start":
+        return "Посетитель начал заполнять контактную форму."
+    if event.event_type in {"contact_submit", "contact_submit_success"}:
+        return "Посетитель отправил заявку через контактную форму."
+    if event.event_type == "contact_submit_error":
+        return "Форма не отправилась: нужно проверить, какие поля не заполнены."
+    if event.event_type == "project_demo_button_click":
+        return f"Посетитель нажал кнопку запуска демо {project or 'проекта'}."
+    if event.event_type in {"cta_click", "contact_button_click"}:
+        return f"Посетитель нажал кнопку на странице {page or 'сайта'}."
+    if event.event_type == "heartbeat":
+        return "Технический сигнал: вкладка сайта была открыта и активна."
+    if event.event_type == "session_end":
+        return "Браузер сообщил о завершении сессии или закрытии вкладки."
+    return f"Событие: {event.event_type}."
+
+
+def event_row(event: AnalyticsEvent, db: Session | None = None) -> dict[str, Any]:
+    """Prepare one analytics event for readable admin templates."""
+    page_seconds = time_on_page_seconds(event, db) if db else None
+    return {
+        "item": event,
+        "label": EVENT_LABELS.get(event.event_type, event.event_type),
+        "description": event_description(event),
+        "tone": EVENT_TONES.get(event.event_type, "default"),
+        "created_at": format_datetime(event.created_at),
+        "time_ago": time_ago(event.created_at),
+        "page": clean_page_url(event.page_url),
+        "time_on_page": duration_ru(page_seconds),
+        "project": event.project_id or "",
+        "session_short": short_id(event.session_id),
+        "demo_session_short": short_id(event.demo_session_id),
+    }
 
 
 def demo_duration(item: DemoSession) -> int:
@@ -119,7 +326,13 @@ def dashboard(request: Request, _: str = Depends(require_admin), db: Session = D
         .order_by(func.count(AnalyticsEvent.id).desc())
         .first()
     )
-    recent_events = db.query(AnalyticsEvent).order_by(AnalyticsEvent.created_at.desc()).limit(20).all()
+    recent_events = (
+        db.query(AnalyticsEvent)
+        .filter(AnalyticsEvent.event_type.notin_(NOISY_DASHBOARD_EVENTS))
+        .order_by(AnalyticsEvent.created_at.desc())
+        .limit(12)
+        .all()
+    )
     return templates.TemplateResponse(
         "admin/dashboard.html",
         {
@@ -134,7 +347,7 @@ def dashboard(request: Request, _: str = Depends(require_admin), db: Session = D
                 "avg_demo": duration(avg_demo),
                 "popular_project": popular_project_row[0] if popular_project_row else "none",
             },
-            "recent_events": recent_events,
+            "recent_events": [event_row(event, db) for event in recent_events],
         },
     )
 
@@ -342,6 +555,7 @@ def analytics(request: Request, _: str = Depends(require_admin), db: Session = D
         {
             "request": request,
             "events": events,
+            "event_rows": [event_row(event, db) for event in events],
             "popular_pages": popular_pages,
             "popular_projects": popular_projects,
             "demo_by_project": demo_by_project,

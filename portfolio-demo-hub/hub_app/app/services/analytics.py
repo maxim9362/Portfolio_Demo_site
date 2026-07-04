@@ -25,6 +25,7 @@ KNOWN_EVENTS = {
     "contact_submit_success",
     "contact_submit_error",
     "demo_launch",
+    "demo_share_link",
     "demo_tab_open",
     "admin_tab_open",
     "demo_finish",

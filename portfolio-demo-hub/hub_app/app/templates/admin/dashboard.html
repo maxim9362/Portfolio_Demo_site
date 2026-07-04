@@ -1,4 +1,4 @@
-{# Admin dashboard: high-level metrics and the latest analytics events. #}
+{# Admin dashboard: high-level metrics and readable visitor activity. #}
 {% extends "admin/base_admin.html" %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
@@ -11,52 +11,54 @@
 </div>
 
 <div class="metric-grid">
-  <div><span>Всего посещений</span><strong>{{ metrics.page_views }}</strong></div>
-  <div><span>Уникальных сессий</span><strong>{{ metrics.unique_sessions }}</strong></div>
+  <div><span>Просмотров страниц</span><strong>{{ metrics.page_views }}</strong></div>
+  <div><span>Посетителей / сессий</span><strong>{{ metrics.unique_sessions }}</strong></div>
   <div><span>Заявок</span><strong>{{ metrics.leads }}</strong></div>
   <div><span>Запусков демо</span><strong>{{ metrics.demo_launches }}</strong></div>
-  <div><span>Переходов в админку</span><strong>{{ metrics.admin_opens }}</strong></div>
+  <div><span>Открытий админки</span><strong>{{ metrics.admin_opens }}</strong></div>
   <div><span>Среднее время на сайте</span><strong>{{ metrics.avg_site }}</strong></div>
   <div><span>Среднее время в демо</span><strong>{{ metrics.avg_demo }}</strong></div>
-  <div><span>Популярный проект</span><strong>{{ metrics.popular_project }}</strong></div>
+  <div><span>Самый активный проект</span><strong>{{ metrics.popular_project }}</strong></div>
 </div>
 
 <section class="admin-section">
   <div class="section-heading compact">
-    <h2>Последние события</h2>
+    <div>
+      <h2>Что происходило на сайте</h2>
+      <p class="muted">Показываю только полезные действия. Технические heartbeat-события скрыты с главного экрана.</p>
+    </div>
     <a class="text-link" href="/admin/analytics">Вся аналитика</a>
   </div>
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Дата</th>
-          <th>Событие</th>
-          <th>Проект</th>
-          <th>Страница</th>
-          <th>Session ID</th>
-          <th>Demo Session ID</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for event in recent_events %}
-        <tr>
-          <td>{{ event.created_at }}</td>
-          <td><span class="status-pill">{{ event.event_type }}</span></td>
-          <td>{{ event.project_id or "" }}</td>
-          <td class="cell-url">{{ event.page_url or "" }}</td>
-          <td>{% if event.session_id %}<a href="/admin/sessions/{{ event.session_id }}">{{ event.session_id }}</a>{% endif %}</td>
-          <td>
-            {% if event.demo_session_id %}
-            <a href="/admin/demo-sessions/{{ event.demo_session_id }}">{{ event.demo_session_id }}</a>
-            {% endif %}
-          </td>
-        </tr>
-        {% else %}
-        <tr><td colspan="6">Событий пока нет.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
+
+  <div class="event-feed">
+    {% for event in recent_events %}
+      <article class="event-card event-{{ event.tone }}">
+        <div class="event-main">
+          <span class="status-pill">{{ event.label }}</span>
+          <h3>{{ event.description }}</h3>
+          <div class="event-meta">
+            <span>{{ event.time_ago }}</span>
+            <span>{{ event.created_at }}</span>
+            {% if event.time_on_page %}<span>На странице: {{ event.time_on_page }}</span>{% endif %}
+            {% if event.page %}<span>{{ event.page }}</span>{% endif %}
+            {% if event.project %}<span>{{ event.project }}</span>{% endif %}
+          </div>
+        </div>
+        <div class="event-links">
+          {% if event.item.session_id %}
+            <a href="/admin/sessions/{{ event.item.session_id }}">Путь посетителя</a>
+          {% endif %}
+          {% if event.item.demo_session_id %}
+            <a href="/admin/demo-sessions/{{ event.item.demo_session_id }}">Демо-сессия</a>
+          {% endif %}
+        </div>
+      </article>
+    {% else %}
+      <div class="empty-state">
+        <h2>Событий пока нет</h2>
+        <p class="muted">Когда посетители начнут открывать страницы, запускать демо или отправлять заявки, действия появятся здесь.</p>
+      </div>
+    {% endfor %}
   </div>
 </section>
 {% endblock %}

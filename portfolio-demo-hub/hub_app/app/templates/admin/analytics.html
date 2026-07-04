@@ -1,10 +1,10 @@
-{# Admin analytics page: event stream, popular pages/projects, and conversion metrics. #}
+{# Admin analytics page: readable summaries plus full event history. #}
 {% extends "admin/base_admin.html" %}
 {% block title %}Аналитика{% endblock %}
 {% block content %}
 <div class="admin-title">
   <div>
-    <p class="eyebrow">Агрегаты и события</p>
+    <p class="eyebrow">Пути посетителей, демо и заявки</p>
     <h1>Аналитика</h1>
   </div>
 </div>
@@ -19,7 +19,7 @@
     </div>
   </div>
   <div>
-    <h2>Популярные проекты</h2>
+    <h2>Просмотры проектов</h2>
     <div class="list-panel">
       {% for project, count in popular_projects %}
       <div><span>{{ project }}</span><strong>{{ count }}</strong></div>
@@ -35,20 +35,21 @@
     </div>
   </div>
   <div>
-    <h2>Переходы в админку</h2>
+    <h2>Открытия админки</h2>
     <div class="list-panel">
       {% for project, count in admin_by_project %}
       <div><span>{{ project }}</span><strong>{{ count }}</strong></div>
-      {% else %}<p>Переходов пока нет.</p>{% endfor %}
+      {% else %}<p>Открытий пока нет.</p>{% endfor %}
     </div>
   </div>
 </section>
 
 <section class="admin-section">
-  <h2>Конверсии</h2>
+  <h2>Конверсия по проектам</h2>
+  <p class="muted">Помогает понять, где человек просто смотрит, а где доходит до демо или заявки.</p>
   <div class="table-wrap">
     <table>
-      <thead><tr><th>Проект</th><th>Просмотры</th><th>Запуски demo</th><th>Заявки</th><th>Просмотр -> demo</th><th>Demo -> заявка</th></tr></thead>
+      <thead><tr><th>Проект</th><th>Просмотры</th><th>Запуски демо</th><th>Заявки</th><th>Просмотр -> демо</th><th>Демо -> заявка</th></tr></thead>
       <tbody>
         {% for item in conversions %}
         <tr>
@@ -66,33 +67,54 @@
 </section>
 
 <section class="admin-section">
-  <h2>Последние analytics events</h2>
+  <div class="section-heading compact">
+    <div>
+      <h2>Все события</h2>
+      <p class="muted">Здесь уже видны и технические события, например heartbeat. Они нужны, чтобы считать активность вкладки и длительность сессии.</p>
+    </div>
+  </div>
   <div class="table-wrap">
     <table>
       <thead>
         <tr>
-          <th>Дата</th>
-          <th>Событие</th>
-          <th>Session ID</th>
-          <th>Demo Session ID</th>
+          <th>Когда</th>
+          <th>Что произошло</th>
+          <th>Где</th>
+          <th>Время на странице</th>
           <th>Проект</th>
-          <th>Страница</th>
-          <th>Metadata</th>
+          <th>Посетитель</th>
+          <th>Демо</th>
+          <th>Технические данные</th>
         </tr>
       </thead>
       <tbody>
-        {% for event in events %}
+        {% for event in event_rows %}
         <tr>
-          <td>{{ event.created_at }}</td>
-          <td><span class="status-pill">{{ event.event_type }}</span></td>
-          <td>{% if event.session_id %}<a href="/admin/sessions/{{ event.session_id }}">{{ event.session_id }}</a>{% endif %}</td>
-          <td>{% if event.demo_session_id %}<a href="/admin/demo-sessions/{{ event.demo_session_id }}">{{ event.demo_session_id }}</a>{% endif %}</td>
-          <td>{{ event.project_id or "" }}</td>
-          <td class="cell-url">{{ event.page_url or "" }}</td>
-          <td class="cell-text">{{ event.metadata_json or "" }}</td>
+          <td>
+            <strong>{{ event.time_ago }}</strong><br>
+            <span class="muted">{{ event.created_at }}</span>
+          </td>
+          <td>
+            <span class="status-pill">{{ event.label }}</span>
+            <div class="cell-text">{{ event.description }}</div>
+          </td>
+          <td class="cell-url">{{ event.page }}</td>
+          <td>{{ event.time_on_page }}</td>
+          <td>{{ event.project }}</td>
+          <td>
+            {% if event.item.session_id %}
+              <a href="/admin/sessions/{{ event.item.session_id }}">{{ event.session_short }}</a>
+            {% endif %}
+          </td>
+          <td>
+            {% if event.item.demo_session_id %}
+              <a href="/admin/demo-sessions/{{ event.item.demo_session_id }}">{{ event.demo_session_short }}</a>
+            {% endif %}
+          </td>
+          <td class="cell-text">{{ event.item.metadata_json or "" }}</td>
         </tr>
         {% else %}
-        <tr><td colspan="7">Событий пока нет.</td></tr>
+        <tr><td colspan="8">Событий пока нет.</td></tr>
         {% endfor %}
       </tbody>
     </table>

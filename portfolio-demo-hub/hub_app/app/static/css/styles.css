@@ -234,10 +234,12 @@ h3 {
 .page-hero h1,
 .project-hero h1,
 .form-shell h1 {
-  font-size: clamp(2.65rem, 5.8vw, 5.45rem);
-  line-height: 0.94;
+  font-size: clamp(2.45rem, 4.8vw, 4.85rem);
+  line-height: 0.98;
   max-width: 980px;
-  overflow-wrap: anywhere;
+  hyphens: none;
+  overflow-wrap: normal;
+  text-wrap: balance;
   word-break: normal;
 }
 
@@ -326,6 +328,13 @@ button.primary:hover,
 .button.primary.active,
 button.primary.active {
   background: linear-gradient(135deg, #ffffff, #9fb3ff 56%, #b79cff);
+}
+
+.button.copied,
+button.copied {
+  background: rgba(125, 255, 178, 0.16);
+  border-color: rgba(125, 255, 178, 0.46);
+  color: #c9ffdf;
 }
 
 .button.large,
@@ -1491,6 +1500,83 @@ th {
 
 .list-panel span {
   overflow-wrap: anywhere;
+}
+
+.event-feed {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.event-card {
+  align-items: flex-start;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 16px;
+}
+
+.event-card h3 {
+  color: var(--ink);
+  font-size: 1rem;
+  line-height: 1.35;
+  margin-top: 10px;
+}
+
+.event-main {
+  min-width: 0;
+}
+
+.event-meta,
+.event-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.event-meta {
+  color: var(--muted);
+  font-size: 0.86rem;
+  margin-top: 10px;
+}
+
+.event-meta span {
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  padding: 5px 8px;
+}
+
+.event-links {
+  justify-content: flex-end;
+  min-width: 150px;
+}
+
+.event-links a {
+  color: var(--cyan);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.event-lead {
+  border-color: rgba(125, 255, 178, 0.34);
+}
+
+.event-demo {
+  border-color: rgba(102, 227, 255, 0.34);
+}
+
+.event-project {
+  border-color: rgba(167, 139, 250, 0.34);
+}
+
+.event-technical {
+  opacity: 0.72;
 }
 
 .empty-state {
