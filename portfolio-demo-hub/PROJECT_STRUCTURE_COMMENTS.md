@@ -20,7 +20,7 @@ assets.
 
 - `nginx/nginx.conf` - the public entrypoint on port 80. It routes the main
   site to `portfolio_hub`, demo URLs to isolated demo containers, admin-demo
-  URLs to demo admin pages, and `/project-assets/` to project media files.
+  URLs to admin pages, and `/project-assets/` to project media files.
 
 ## hub_app
 
@@ -82,7 +82,7 @@ assets.
 - `preview.*`, `video.*` - media served through `/project-assets/`.
 - `app/main.py` - AI Chat FastAPI application.
 - `app/api/` - chat, leads, and knowledge ingestion endpoints.
-- `app/admin/` - demo admin UI for collected leads.
+- `app/admin/` - admin UI for collected leads.
 - `app/database/` - separate database connection and initialization.
 - `app/models/` - AI Chat database models.
 - `app/rag/` - knowledge ingestion, embeddings, and retrieval.

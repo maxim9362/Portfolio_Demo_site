@@ -1,0 +1,177 @@
+{# Reusable public solution page rendered from SOLUTION_PAGES in routes/pages.py. #}
+{% extends "base.html" %}
+
+{% block title %}{{ solution.title }}{% endblock %}
+{% block meta_description %}{{ solution.description }}{% endblock %}
+{% block og_title %}{{ solution.h1 }}{% endblock %}
+{% block og_description %}{{ solution.description }}{% endblock %}
+
+{% block content %}
+<section class="page-hero reveal">
+  <div class="hero-copy">
+    <span class="eyebrow">{{ solution.eyebrow }}</span>
+    <h1>{{ solution.h1 }}</h1>
+    <p>{{ solution.hero }}</p>
+    <div class="hero-actions">
+      {% if solution.demo_links %}
+      <a class="button primary" href="{{ solution.demo_links[0].href }}">{{ solution.demo_links[0].label }}</a>
+      {% endif %}
+      <a class="button ghost" href="/contact">Обсудить для клиента</a>
+    </div>
+  </div>
+  <div class="hero-panel">
+    <span class="panel-kicker">Partner-ready</span>
+    <strong>{{ solution.plain_title }}</strong>
+    <p>{{ solution.plain }}</p>
+  </div>
+</section>
+
+<section class="intro-section reveal">
+  <div class="section-heading">
+    <span class="eyebrow">Простыми словами</span>
+    <h2>{{ solution.plain_title }}</h2>
+    <p>{{ solution.plain }}</p>
+  </div>
+</section>
+
+<section class="section reveal">
+  <div class="section-heading">
+    <span class="eyebrow">Для кого это</span>
+    <h2>Кому удобно предлагать это решение</h2>
+  </div>
+  <div class="pill-grid">
+    {% for item in solution.audience %}
+    <span>{{ item }}</span>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="proof-section reveal">
+  <div class="section-heading">
+    <span class="eyebrow">Ценность</span>
+    <h2>Что получает партнёр и клиент</h2>
+  </div>
+  <div class="proof-grid">
+    <div class="proof-card">
+      <strong>Партнёр получает</strong>
+      <ul class="clean-list">
+        {% for item in solution.partner_value %}
+        <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="proof-card">
+      <strong>Клиент партнёра получает</strong>
+      <ul class="clean-list">
+        {% for item in solution.client_value %}
+        <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="section reveal">
+  <div class="section-heading">
+    <span class="eyebrow">Процесс</span>
+    <h2>Как это работает</h2>
+  </div>
+  <div class="workflow">
+    {% for step in solution.steps %}
+    <div class="workflow-step">
+      <span>{{ loop.index }}</span>
+      <p>{{ step }}</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section reveal">
+  <div class="section-heading">
+    <span class="eyebrow">Адаптация</span>
+    <h2>Что можно настроить под нишу клиента</h2>
+  </div>
+  <div class="feature-grid">
+    {% for item in solution.adapt %}
+    <div class="feature-card">
+      <h3>{{ item }}</h3>
+      <p>Настраивается под конкретную нишу, стиль общения и задачу сайта клиента.</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+{% if solution.demo_links %}
+<section class="cta-band reveal">
+  <div>
+    <span class="eyebrow">Живое демо</span>
+    <h2>Можно открыть и показать клиенту</h2>
+    <p>Демо помогает быстро объяснить идею без длинной презентации: видно сайт, сценарий заявки и админскую часть.</p>
+  </div>
+  <div class="cta-actions">
+    {% for link in solution.demo_links %}
+    <a class="button {{ 'primary' if link.primary else 'ghost' }}" href="{{ link.href }}">{{ link.label }}</a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<section class="section reveal">
+  <div class="section-heading">
+    <span class="eyebrow">Связанные решения</span>
+    <h2>Что ещё может подойти этому клиенту</h2>
+  </div>
+  <div class="product-grid">
+    {% for link in solution.related %}
+    <article class="product-card">
+      <div class="product-meta">
+        <span>Решение</span>
+        <h3>{{ link.label }}</h3>
+        <p>Можно рассмотреть как отдельный модуль или как часть общего клиентского проекта.</p>
+      </div>
+      <div class="card-actions">
+        <a class="button small primary" href="{{ link.href }}">Открыть</a>
+      </div>
+    </article>
+    {% endfor %}
+    <article class="product-card">
+      <div class="product-meta">
+        <span>Партнёрство</span>
+        <h3>Как работать вместе</h3>
+        <p>Формат сотрудничества для дизайнеров, SEO, маркетологов, WordPress-специалистов и агентств.</p>
+      </div>
+      <div class="card-actions">
+        <a class="button small primary" href="/for-partners">Партнёрам</a>
+        <a class="text-link" href="/projects">Демо</a>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section class="section reveal">
+  <div class="section-heading">
+    <span class="eyebrow">FAQ</span>
+    <h2>Частые вопросы партнёров</h2>
+  </div>
+  <div class="faq-list">
+    {% for question, answer in faq_items %}
+    <details>
+      <summary>{{ question }}</summary>
+      <p>{{ answer }}</p>
+    </details>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="cta-band reveal">
+  <div>
+    <span class="eyebrow">Обсудить задачу</span>
+    <h2>Есть клиент или идея для демо?</h2>
+    <p>Напишите, какая ниша, какой сайт и что нужно автоматизировать. Подберём понятный сценарий для первого показа.</p>
+  </div>
+  <div class="cta-actions">
+    <a class="button primary" href="/contact">Связаться</a>
+    <a class="button ghost" href="/projects">Посмотреть демо</a>
+  </div>
+</section>
+{% endblock %}

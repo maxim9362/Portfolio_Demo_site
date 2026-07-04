@@ -23,6 +23,8 @@ class ContactLead(Base):
     phone: Mapped[str | None] = mapped_column(String(80))
     email: Mapped[str | None] = mapped_column(String(255))
     client_type: Mapped[str | None] = mapped_column(String(120))
+    interest: Mapped[str | None] = mapped_column(String(120))
+    project_status: Mapped[str | None] = mapped_column(String(120))
     project_id: Mapped[str | None] = mapped_column(String(120), index=True)
     message: Mapped[str | None] = mapped_column(Text)
     source_page: Mapped[str | None] = mapped_column(String(500))

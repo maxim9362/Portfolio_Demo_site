@@ -360,7 +360,7 @@ Python-код менять не нужно, если сценарий помещ
 ## Production notes
 
 - заменить `ADMIN_API_KEY` на длинный случайный ключ;
-- заменить demo admin username/password;
+- заменить логин и пароль админки;
 - не хранить admin credentials во frontend;
 - не публиковать `.env` в GitHub;
 - заменить email stub на SMTP или другой approved email provider;

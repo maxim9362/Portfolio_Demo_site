@@ -27,9 +27,9 @@ class Settings(BaseSettings):
     site_url: str = Field("http://localhost", alias="SITE_URL")
     contact_telegram: str = Field("your_telegram", alias="CONTACT_TELEGRAM")
     contact_email: str = Field("you@example.com", alias="CONTACT_EMAIL")
-    contact_whatsapp: str = Field("972503213621", alias="CONTACT_WHATSAPP")
+    contact_whatsapp: str = Field("972500000000", alias="CONTACT_WHATSAPP")
     contact_facebook: str = Field(
-        "https://www.facebook.com/profile.php?id=61584187357263&locale=ru_RU",
+        "https://www.facebook.com/your-profile",
         alias="CONTACT_FACEBOOK",
     )
     contact_photo_url: str = Field("/static/img/maxim-profile.jpg", alias="CONTACT_PHOTO_URL")

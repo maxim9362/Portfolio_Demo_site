@@ -1,13 +1,15 @@
 {% extends "base.html" %}
-{% block title %}Страница не найдена{% endblock %}
+{% block title %}Страница не найдена — Maxim AI Automation{% endblock %}
+{% block meta_description %}Страница не найдена. Вернитесь на главную, посмотрите живые демо или свяжитесь с Maxim AI Automation.{% endblock %}
 {% block content %}
 <section class="empty-state">
   <p class="eyebrow">404</p>
   <h1>Страница не найдена</h1>
   <p class="lead">{{ detail or "Такого адреса нет или проект пока не добавлен." }}</p>
   <div class="actions">
-    <a class="button primary" href="/projects">К проектам</a>
-    <a class="button" href="/">На главную</a>
+    <a class="button primary" href="/">На главную</a>
+    <a class="button" href="/projects">Посмотреть живые демо</a>
+    <a class="button" href="/contact">Связаться</a>
   </div>
 </section>
 {% endblock %}

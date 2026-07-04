@@ -20,6 +20,37 @@ router = APIRouter(prefix="/admin")
 templates = Jinja2Templates(directory="app/templates")
 security = HTTPBasic()
 
+CLIENT_TYPE_LABELS = {
+    "web_designer": "Веб-дизайнер",
+    "wordpress_developer": "WordPress-разработчик",
+    "seo_specialist": "SEO-специалист",
+    "marketer": "Маркетолог",
+    "small_agency": "Небольшое агентство",
+    "freelancer": "Фрилансер",
+    "business_owner": "Владелец бизнеса",
+    "agency": "Агентство",
+    "designer": "Дизайнер / разработчик",
+    "other": "Другое",
+}
+
+INTEREST_LABELS = {
+    "ai_site_consultant": "AI-консультант для сайта клиента",
+    "smart_lead_form": "Умная форма заявки",
+    "website_development": "Разработка сайта / landing page",
+    "lead_automation": "Автоматизация заявок",
+    "wordpress_integration": "Подключение к WordPress-сайту",
+    "white_label": "White-label сотрудничество",
+    "ongoing_partnership": "Постоянное партнёрство",
+    "other": "Другое",
+}
+
+PROJECT_STATUS_LABELS = {
+    "has_client": "Есть конкретный клиент",
+    "has_idea": "Есть идея",
+    "exploring_partnership": "Смотрит варианты сотрудничества",
+    "just_researching": "Пока изучает",
+}
+
 
 def require_admin(credentials: HTTPBasicCredentials = Depends(security)) -> str:
     """Basic Auth dependency used by every admin route."""
@@ -147,6 +178,9 @@ def leads(
                 "project_id": project_id or "",
                 "client_type": client_type or "",
             },
+            "client_type_labels": CLIENT_TYPE_LABELS,
+            "interest_labels": INTEREST_LABELS,
+            "project_status_labels": PROJECT_STATUS_LABELS,
         },
     )
 

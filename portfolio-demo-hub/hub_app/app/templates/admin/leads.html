@@ -33,7 +33,7 @@
     <select name="client_type">
       <option value="">Все</option>
       {% for type in client_types %}
-      <option value="{{ type }}" {% if filters.client_type == type %}selected{% endif %}>{{ type }}</option>
+      <option value="{{ type }}" {% if filters.client_type == type %}selected{% endif %}>{{ client_type_labels.get(type, type) }}</option>
       {% endfor %}
     </select>
   </label>
@@ -48,8 +48,9 @@
         <th>Дата</th>
         <th>Имя</th>
         <th>Контакты</th>
-        <th>Тип</th>
-        <th>Проект</th>
+        <th>Кто</th>
+        <th>Интерес</th>
+        <th>Статус проекта</th>
         <th>Сообщение</th>
         <th>Источник</th>
         <th>Session ID</th>
@@ -66,8 +67,14 @@
           <div>{{ lead.phone or "" }}</div>
           <div>{{ lead.email or "" }}</div>
         </td>
-        <td>{{ lead.client_type or "" }}</td>
-        <td>{{ lead.project_id or "" }}</td>
+        <td>{{ client_type_labels.get(lead.client_type, lead.client_type or "") }}</td>
+        <td>
+          <div>{{ interest_labels.get(lead.interest, lead.interest or lead.project_id or "") }}</div>
+          {% if lead.project_id %}
+          <div class="muted">{{ lead.project_id }}</div>
+          {% endif %}
+        </td>
+        <td>{{ project_status_labels.get(lead.project_status, lead.project_status or "") }}</td>
         <td class="cell-text">{{ lead.message or "" }}</td>
         <td class="cell-url">{{ lead.source_page or "" }}</td>
         <td>
@@ -89,7 +96,7 @@
         </td>
       </tr>
       {% else %}
-      <tr><td colspan="10">Заявок пока нет.</td></tr>
+      <tr><td colspan="11">Заявок пока нет.</td></tr>
       {% endfor %}
     </tbody>
   </table>

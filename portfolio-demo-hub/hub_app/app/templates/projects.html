@@ -1,17 +1,68 @@
-{# Project catalog page: renders active projects loaded from projects/*/project.json. #}
+{# Project catalog page: live demos positioned as client-ready examples for partners. #}
 {% extends "base.html" %}
-{% block title %}Готовые демо-проекты для заявок — AI Automation{% endblock %}
-{% block meta_description %}Рабочие демо AI-консультанта для сайта и умной формы заявки: что видит клиент, что получает владелец и как это можно адаптировать под бизнес.{% endblock %}
-{% block og_title %}Готовые демо-проекты для заявок — AI Automation{% endblock %}
-{% block og_description %}Откройте демо AI-консультанта и умной формы заявки, чтобы понять, как они помогают бизнесу получать более понятные обращения.{% endblock %}
+{% block title %}Живые демо AI-консультантов и умных форм заявок — Maxim AI Automation{% endblock %}
+{% block meta_description %}Посмотрите живые демо решений для сайтов клиентов: AI-консультант, умная форма заявки, админка и автоматизация обработки обращений.{% endblock %}
+{% block og_title %}Живые демо AI-консультантов и умных форм заявок — Maxim AI Automation{% endblock %}
+{% block og_description %}Рабочие демо, которые партнёр может показать клиенту: что видит посетитель сайта, что получает владелец бизнеса и что можно адаптировать под нишу.{% endblock %}
 {% block content %}
+{% set demo_reasons = [
+  "легче объяснить ценность решения",
+  "проще показать отличие от обычной формы или обычного чата",
+  "можно быстрее согласовать идею с клиентом",
+  "партнёр выглядит сильнее, потому что показывает рабочий пример",
+  "демо можно адаптировать под конкретную нишу клиента"
+] %}
+
+{% set partner_uses = [
+  "показать клиенту рабочий пример вместо долгого объяснения",
+  "использовать демо на созвоне или в переписке",
+  "обсудить, какое решение подходит под нишу клиента",
+  "предложить дополнительную услугу к сайту, SEO или маркетингу",
+  "начать с одного проекта и проверить интерес клиента"
+] %}
+
+{% set adaptation_items = [
+  "нишу и услуги клиента",
+  "тексты и вопросы",
+  "сценарии общения",
+  "поля заявки",
+  "цены и условия",
+  "внешний вид",
+  "админку",
+  "логику обработки обращений"
+] %}
+
 <section class="page-hero">
-  <p class="eyebrow">Готовые демо-проекты</p>
-  <h1>Решения, которые можно открыть, протестировать и адаптировать под бизнес.</h1>
-  <p class="lead">Каждый проект показывает понятный сценарий: что видит посетитель, какую заявку получает владелец и как инструмент помогает меньше тратить время на ручные уточнения.</p>
+  <p class="eyebrow">Живые демо для партнёров</p>
+  <h1>Живые демо решений, которые можно предложить вашим клиентам</h1>
+  <p class="lead">Здесь можно посмотреть, как AI-консультант и умная форма заявки работают глазами посетителя сайта и владельца бизнеса.</p>
+  <p class="lead compact-lead">Демо можно использовать как пример для клиента: показать идею, объяснить пользу и обсудить адаптацию под его нишу.</p>
+  <div class="actions">
+    <a class="button primary large" href="/contact" data-track-event="contact_button_click">Обсудить внедрение</a>
+    <a class="button large" href="/for-partners">Для партнёров</a>
+  </div>
+</section>
+
+<section class="section proof-section">
+  <div class="proof-copy">
+    <p class="eyebrow">Зачем нужны живые демо</p>
+    <h2>Клиенту проще понять решение, когда он может открыть его и пройти сценарий сам.</h2>
+    <p>Живое демо показывает, что видит посетитель сайта, как собирается заявка и что получает владелец бизнеса в админке. Это не финальный проект, а быстрый способ объяснить идею и проверить интерес.</p>
+  </div>
+  <div class="proof-grid">
+    {% for item in demo_reasons %}
+      <article><strong>{{ "%02d"|format(loop.index) }}</strong><span>{{ item }}</span></article>
+    {% endfor %}
+  </div>
 </section>
 
 <section class="section">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">Демо-проекты</p>
+      <h2>Рабочие примеры, которые можно открыть, протестировать и показать клиенту.</h2>
+    </div>
+  </div>
   <div class="project-grid">
     {% for project in projects %}
       {% include "project_card.html" %}
@@ -21,11 +72,40 @@
   </div>
 </section>
 
+<section class="section">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">Как использовать демо</p>
+      <h2>Партнёр может использовать эти примеры до финальной разработки.</h2>
+      <p>Демо не заменяет финальный проект. Оно помогает быстрее объяснить идею и понять, стоит ли адаптировать решение под конкретного клиента.</p>
+    </div>
+  </div>
+  <div class="feature-grid">
+    {% for item in partner_uses %}
+      <article class="feature-card"><span>{{ "%02d"|format(loop.index) }}</span><h3>{{ item }}</h3></article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section intro-section">
+  <div>
+    <p class="eyebrow">Адаптация</p>
+    <h2>Что можно адаптировать под клиента</h2>
+    <p>Один и тот же технический шаблон можно использовать для разных ниш: юристы, клиники, салоны красоты, ремонтные компании, риелторы, страховые агенты, нотариусы и локальные услуги.</p>
+  </div>
+  <div class="pill-grid">
+    {% for item in adaptation_items %}
+      <span>{{ item }}</span>
+    {% endfor %}
+  </div>
+</section>
+
 <section class="cta-band">
   <div>
-    <p class="eyebrow">Не знаете, с чего начать?</p>
-    <h2>Можно обсудить задачу и выбрать: сайт, AI-консультант, умная форма или автоматизация заявок.</h2>
+    <p class="eyebrow">Следующий шаг</p>
+    <h2>Хотите предложить такое решение своему клиенту?</h2>
+    <p>Напишите, чем занимается ваш клиент и какую задачу нужно закрыть. Я подскажу, что лучше подойдёт: AI-консультант, умная форма заявки, сайт или автоматизация.</p>
   </div>
-  <a class="button primary large" href="/contact" data-track-event="contact_button_click">Обсудить задачу</a>
+  <a class="button primary large" href="/contact" data-track-event="contact_button_click">Обсудить внедрение</a>
 </section>
 {% endblock %}

@@ -1,0 +1,88 @@
+{# Overview page for partner-facing solution categories. #}
+{% extends "base.html" %}
+
+{% block title %}Решения для сайтов клиентов — AI, формы заявок и автоматизация — Maxim AI Automation{% endblock %}
+{% block meta_description %}Решения для дизайнеров, WordPress-разработчиков, SEO-специалистов и агентств: AI-консультанты, умные формы заявок, автоматизация и техническая реализация сайтов.{% endblock %}
+{% block og_title %}Решения для сайтов клиентов{% endblock %}
+{% block og_description %}AI-консультанты, умные формы заявок, WordPress-интеграции и автоматизация, которые можно добавить к клиентским сайтам.{% endblock %}
+
+{% block content %}
+<section class="page-hero reveal">
+  <div class="hero-copy">
+    <span class="eyebrow">Решения для партнёров</span>
+    <h1>Готовые направления, которые можно добавить к сайтам клиентов</h1>
+    <p>
+      Здесь собраны решения, которые помогают веб-дизайнерам, WordPress-разработчикам,
+      SEO-специалистам, маркетологам и небольшим агентствам усиливать клиентские проекты:
+      AI-консультант, умные формы заявок, автоматизация и техническая реализация.
+    </p>
+    <div class="hero-actions">
+      <a class="button primary" href="/projects">Посмотреть живые демо</a>
+      <a class="button ghost" href="/contact">Обсудить сотрудничество</a>
+    </div>
+  </div>
+  <div class="hero-panel">
+    <span class="panel-kicker">Partner stack</span>
+    <strong>Demo / Admin / Leads</strong>
+    <p>Показываете клиенту рабочий сценарий, а техническую часть можно отдать мне.</p>
+  </div>
+</section>
+
+<section class="section reveal">
+  <div class="section-heading">
+    <span class="eyebrow">Что можно предложить клиентам</span>
+    <h2>Решения под разные задачи сайта</h2>
+    <p>Каждая страница объясняет решение простыми словами, показывает ценность для партнёра и ведёт к живому демо или контакту.</p>
+  </div>
+  <div class="product-grid">
+    {% for slug, solution in solutions.items() %}
+    <article class="product-card">
+      <div class="product-meta">
+        <span>{{ solution.eyebrow }}</span>
+        <h3>{{ solution.h1 }}</h3>
+        <p>{{ solution.hero }}</p>
+      </div>
+      <div class="card-actions">
+        <a class="button small primary" href="{{ solution.url }}">Подробнее</a>
+        {% if solution.demo_links %}
+        <a class="text-link" href="{{ solution.demo_links[0].href }}">Демо</a>
+        {% endif %}
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="proof-section reveal">
+  <div class="section-heading">
+    <span class="eyebrow">Для кого</span>
+    <h2>Подходит тем, кто работает с клиентскими сайтами</h2>
+  </div>
+  <div class="proof-grid">
+    <div class="proof-card">
+      <strong>Веб-дизайнеры и WordPress-разработчики</strong>
+      <p>Можно добавить к сайту полезный функционал без поиска отдельной backend-команды.</p>
+    </div>
+    <div class="proof-card">
+      <strong>SEO и маркетинг</strong>
+      <p>Сайт получает понятный путь к заявке, а не только трафик и обычную контактную форму.</p>
+    </div>
+    <div class="proof-card">
+      <strong>Небольшие агентства</strong>
+      <p>Можно расширить предложение для клиента и оставить коммуникацию с клиентом на своей стороне.</p>
+    </div>
+  </div>
+</section>
+
+<section class="cta-band reveal">
+  <div>
+    <span class="eyebrow">Следующий шаг</span>
+    <h2>Можно начать с одного клиента или одного демо</h2>
+    <p>Опишите нишу, сайт и задачу клиента. Я подскажу, какое решение лучше показать первым.</p>
+  </div>
+  <div class="cta-actions">
+    <a class="button primary" href="/for-partners">Как работаем с партнёрами</a>
+    <a class="button ghost" href="/contact">Написать</a>
+  </div>
+</section>
+{% endblock %}

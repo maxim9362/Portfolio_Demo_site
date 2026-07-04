@@ -9,7 +9,7 @@ from urllib.request import urlopen
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Request
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, field_validator
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
@@ -27,10 +27,12 @@ DEMO_SESSION_ID_RE = re.compile(r"^demo_[0-9a-f]{32}$")
 class ContactPayload(BaseModel):
     """Payload from the public contact form."""
 
-    name: str = Field(min_length=1)
+    name: str = ""
     phone: str | None = None
     email: str | None = None
     client_type: str | None = None
+    interest: str | None = None
+    project_status: str | None = None
     project_id: str | None = None
     message: str | None = None
     source_page: str | None = None
@@ -82,9 +84,17 @@ class DemoSessionFinishPayload(BaseModel):
 def submit_contact(payload: ContactPayload, request: Request, db: Session = Depends(get_db)) -> dict[str, Any]:
     """Validate and save a lead, then record the matching contact_submit event."""
     if not payload.name.strip():
-        raise HTTPException(status_code=422, detail="Name is required")
+        _record_contact_error(db, payload, request, "missing_name")
+        raise HTTPException(status_code=422, detail="Укажите имя.")
     if not (payload.phone and payload.phone.strip()) and not (payload.email and payload.email.strip()):
-        raise HTTPException(status_code=422, detail="Phone or email is required")
+        _record_contact_error(db, payload, request, "missing_contact")
+        raise HTTPException(status_code=422, detail="Укажите email или телефон, чтобы я мог связаться с вами.")
+    if not (payload.interest and payload.interest.strip()):
+        _record_contact_error(db, payload, request, "missing_interest")
+        raise HTTPException(status_code=422, detail="Выберите, что вас интересует.")
+    if not (payload.message and len(payload.message.strip()) >= 5):
+        _record_contact_error(db, payload, request, "short_message")
+        raise HTTPException(status_code=422, detail="Сообщение слишком короткое. Напишите пару слов о задаче.")
 
     lead = ContactLead(**payload.model_dump())
     db.add(lead)
@@ -94,11 +104,35 @@ def submit_contact(payload: ContactPayload, request: Request, db: Session = Depe
         session_id=payload.session_id,
         project_id=payload.project_id,
         page_url=payload.source_page,
+        metadata={"interest": payload.interest, "client_type": payload.client_type},
+        request=request,
+    )
+    record_event(
+        db,
+        "contact_submit_success",
+        session_id=payload.session_id,
+        project_id=payload.project_id,
+        page_url=payload.source_page,
+        metadata={"interest": payload.interest, "client_type": payload.client_type},
         request=request,
     )
     db.commit()
     db.refresh(lead)
     return {"success": True, "lead_id": lead.id}
+
+
+def _record_contact_error(db: Session, payload: ContactPayload, request: Request, error_code: str) -> None:
+    """Record a non-personal analytics event for a failed contact submit."""
+    record_event(
+        db,
+        "contact_submit_error",
+        session_id=payload.session_id,
+        project_id=payload.project_id,
+        page_url=payload.source_page,
+        metadata={"error": error_code, "interest": payload.interest, "client_type": payload.client_type},
+        request=request,
+    )
+    db.commit()
 
 
 @router.post("/analytics/event")

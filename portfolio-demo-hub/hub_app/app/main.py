@@ -11,6 +11,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from sqlalchemy import text
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.config import get_settings
@@ -34,6 +35,7 @@ def on_startup() -> None:
         raise RuntimeError("ADMIN_PASSWORD must be changed in production")
 
     Base.metadata.create_all(bind=engine)
+    ensure_contact_lead_columns()
     logger.info(
         "\n"
         "============================================================\n"
@@ -66,7 +68,12 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
     if exc.status_code == 404 and "text/html" in request.headers.get("accept", ""):
         return templates.TemplateResponse(
             "error_404.html",
-            {"request": request, "detail": exc.detail},
+            pages.public_context(
+                request.url.path,
+                request=request,
+                detail=exc.detail,
+                robots_noindex=True,
+            ),
             status_code=404,
         )
     return JSONResponse(
@@ -80,3 +87,14 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
 app.include_router(pages.router)
 app.include_router(api.router)
 app.include_router(admin.router)
+
+
+def ensure_contact_lead_columns() -> None:
+    """Add lightweight dev columns that create_all cannot add to existing tables."""
+    statements = [
+        "ALTER TABLE contact_leads ADD COLUMN IF NOT EXISTS interest VARCHAR(120)",
+        "ALTER TABLE contact_leads ADD COLUMN IF NOT EXISTS project_status VARCHAR(120)",
+    ]
+    with engine.begin() as connection:
+        for statement in statements:
+            connection.execute(text(statement))

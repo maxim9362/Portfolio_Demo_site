@@ -237,6 +237,8 @@ h3 {
   font-size: clamp(2.65rem, 5.8vw, 5.45rem);
   line-height: 0.94;
   max-width: 980px;
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
 
 .hero h1 {
@@ -261,6 +263,7 @@ h3 {
   font-size: clamp(1.03rem, 1.6vw, 1.24rem);
   margin: 18px 0 0;
   max-width: 730px;
+  overflow-wrap: anywhere;
 }
 
 .section-copy,
@@ -370,7 +373,12 @@ button.danger {
   display: inline-flex;
   font-size: 0.85rem;
   font-weight: 750;
+  line-height: 1.18;
+  max-width: 100%;
+  overflow-wrap: anywhere;
   padding: 7px 12px;
+  text-align: center;
+  white-space: normal;
 }
 
 .hero-console {
@@ -1184,6 +1192,25 @@ button.danger {
 
 .contact-form {
   padding: clamp(20px, 4vw, 32px);
+}
+
+.contact-success {
+  align-self: start;
+  background: linear-gradient(145deg, rgba(22, 163, 74, 0.16), rgba(14, 165, 233, 0.10));
+  border: 1px solid rgba(125, 211, 252, 0.28);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  display: grid;
+  gap: 14px;
+  padding: clamp(22px, 4vw, 34px);
+}
+
+.contact-success[hidden] {
+  display: none;
+}
+
+.contact-success h2 {
+  margin: 0;
 }
 
 label {
