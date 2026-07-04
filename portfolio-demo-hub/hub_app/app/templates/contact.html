@@ -1,9 +1,9 @@
 ﻿{# Partner-oriented contact page: collects enough context without becoming a long questionnaire. #}
 {% extends "base.html" %}
-{% block title %}РћР±СЃСѓРґРёС‚СЊ СЃРѕС‚СЂСѓРґРЅРёС‡РµСЃС‚РІРѕ вЂ” AI Automation{% endblock %}
-{% block meta_description %}РЎРІСЏР¶РёС‚РµСЃСЊ, С‡С‚РѕР±С‹ РѕР±СЃСѓРґРёС‚СЊ AI-РєРѕРЅСЃСѓР»СЊС‚Р°РЅС‚Р°, СѓРјРЅСѓСЋ С„РѕСЂРјСѓ Р·Р°СЏРІРєРё, СЂР°Р·СЂР°Р±РѕС‚РєСѓ СЃР°Р№С‚Р°, Р°РІС‚РѕРјР°С‚РёР·Р°С†РёСЋ РёР»Рё С‚РµС…РЅРёС‡РµСЃРєРѕРµ РїР°СЂС‚РЅС‘СЂСЃС‚РІРѕ РґР»СЏ РїСЂРѕРµРєС‚РѕРІ РєР»РёРµРЅС‚РѕРІ.{% endblock %}
-{% block og_title %}РћР±СЃСѓРґРёС‚СЊ СЃРѕС‚СЂСѓРґРЅРёС‡РµСЃС‚РІРѕ вЂ” AI Automation{% endblock %}
-{% block og_description %}РљРѕСЂРѕС‚РєРѕ РѕРїРёС€РёС‚Рµ Р·Р°РґР°С‡Сѓ РєР»РёРµРЅС‚Р° РёР»Рё С„РѕСЂРјР°С‚ РїР°СЂС‚РЅС‘СЂСЃС‚РІР°: AI-РєРѕРЅСЃСѓР»СЊС‚Р°РЅС‚, СѓРјРЅР°СЏ С„РѕСЂРјР° Р·Р°СЏРІРєРё, СЃР°Р№С‚, Р°РІС‚РѕРјР°С‚РёР·Р°С†РёСЏ РёР»Рё С‚РµС…РЅРёС‡РµСЃРєР°СЏ СЂРµР°Р»РёР·Р°С†РёСЏ.{% endblock %}
+{% block title %}Обсудить сотрудничество — AI Automation{% endblock %}
+{% block meta_description %}Свяжитесь, чтобы обсудить AI-консультанта, умную форму заявки, разработку сайта, автоматизацию или техническое партнёрство для проектов клиентов.{% endblock %}
+{% block og_title %}Обсудить сотрудничество — AI Automation{% endblock %}
+{% block og_description %}Коротко опишите задачу клиента или формат партнёрства: AI-консультант, умная форма заявки, сайт, автоматизация или техническая реализация.{% endblock %}
 
 {% block content %}
 <section class="form-shell contact-shell">
@@ -12,32 +12,32 @@
       <img class="contact-photo" src="{{ contact.photo_url }}" alt="AI Automation" loading="lazy" decoding="async">
       <div>
         <p class="eyebrow">AI Automation</p>
-        <h1>РћР±СЃСѓРґРёС‚СЊ СЃРѕС‚СЂСѓРґРЅРёС‡РµСЃС‚РІРѕ</h1>
+        <h1>Обсудить сотрудничество</h1>
       </div>
     </div>
     <p class="lead">
-      РќР°РїРёС€РёС‚Рµ, С‡РµРј РІС‹ Р·Р°РЅРёРјР°РµС‚РµСЃСЊ Рё РєР°РєСѓСЋ Р·Р°РґР°С‡Сѓ С…РѕС‚РёС‚Рµ Р·Р°РєСЂС‹С‚СЊ РґР»СЏ РєР»РёРµРЅС‚Р°:
-      AI-РєРѕРЅСЃСѓР»СЊС‚Р°РЅС‚, СѓРјРЅР°СЏ С„РѕСЂРјР° Р·Р°СЏРІРєРё, СЃР°Р№С‚, Р°РІС‚РѕРјР°С‚РёР·Р°С†РёСЏ РёР»Рё С‚РµС…РЅРёС‡РµСЃРєР°СЏ СЂРµР°Р»РёР·Р°С†РёСЏ РїСЂРѕРµРєС‚Р°.
+      Напишите, чем вы занимаетесь и какую задачу хотите закрыть для клиента:
+      AI-консультант, умная форма заявки, сайт, автоматизация или техническая реализация проекта.
     </p>
     <p class="muted">
-      РњРѕР¶РЅРѕ РЅР°С‡Р°С‚СЊ СЃ РѕРґРЅРѕРіРѕ РїСЂРѕРµРєС‚Р°, РїРѕСЃРјРѕС‚СЂРµС‚СЊ Р¶РёРІС‹Рµ РґРµРјРѕ Рё РїРѕРЅСЏС‚СЊ, РєР°РєРѕРµ СЂРµС€РµРЅРёРµ Р»СѓС‡С€Рµ РїРѕРґРѕР№РґС‘С‚ РІР°С€РµРјСѓ РєР»РёРµРЅС‚Сѓ.
+      Можно начать с одного проекта, посмотреть живые демо и понять, какое решение лучше подойдёт вашему клиенту.
     </p>
 
     <div class="contact-points">
-      <span>AI-РєРѕРЅСЃСѓР»СЊС‚Р°РЅС‚ РґР»СЏ СЃР°Р№С‚Р° РєР»РёРµРЅС‚Р°</span>
-      <span>РЈРјРЅР°СЏ С„РѕСЂРјР° Р·Р°СЏРІРєРё</span>
-      <span>Р’РЅРµС€РЅРёР№ РІРёРґР¶РµС‚ РґР»СЏ WordPress-СЃР°Р№С‚Р°</span>
-      <span>РўРµС…РЅРёС‡РµСЃРєР°СЏ СЂРµР°Р»РёР·Р°С†РёСЏ СЃР°Р№С‚Р°</span>
-      <span>РђРІС‚РѕРјР°С‚РёР·Р°С†РёСЏ РѕР±СЂР°Р±РѕС‚РєРё Р·Р°СЏРІРѕРє</span>
-      <span>White-label С„РѕСЂРјР°С‚</span>
-      <span>Р Р°Р·РѕРІС‹Р№ РїСЂРѕРµРєС‚ РёР»Рё РїРѕСЃС‚РѕСЏРЅРЅРѕРµ РїР°СЂС‚РЅС‘СЂСЃС‚РІРѕ</span>
+      <span>AI-консультант для сайта клиента</span>
+      <span>Умная форма заявки</span>
+      <span>Внешний виджет для WordPress-сайта</span>
+      <span>Техническая реализация сайта</span>
+      <span>Автоматизация обработки заявок</span>
+      <span>White-label формат</span>
+      <span>Разовый проект или постоянное партнёрство</span>
     </div>
 
     <div class="contact-direct">
-      <p class="eyebrow">РљР°Рє СЏ РѕС‚РІРµС‡Р°СЋ</p>
+      <p class="eyebrow">Как я отвечаю</p>
       <p>
-        РћР±С‹С‡РЅРѕ РґР»СЏ СЃС‚Р°СЂС‚Р° РґРѕСЃС‚Р°С‚РѕС‡РЅРѕ РєРѕСЂРѕС‚РєРѕ РѕРїРёСЃР°С‚СЊ Р·Р°РґР°С‡Сѓ. Р•СЃР»Рё РЅСѓР¶РЅРѕ, СЏ СѓС‚РѕС‡РЅСЋ РЅРёС€Сѓ РєР»РёРµРЅС‚Р°,
-        СЃР°Р№С‚, РєР°РєРёРµ Р·Р°СЏРІРєРё РЅСѓР¶РЅРѕ СЃРѕР±РёСЂР°С‚СЊ Рё РєР°РєРѕР№ С„РѕСЂРјР°С‚ СЃРѕС‚СЂСѓРґРЅРёС‡РµСЃС‚РІР° СѓРґРѕР±РµРЅ.
+        Обычно для старта достаточно коротко описать задачу. Если нужно, я уточню нишу клиента,
+        сайт, какие заявки нужно собирать и какой формат сотрудничества удобен.
       </p>
       <div class="contact-channels">
         <a class="button small" href="{{ contact.whatsapp_url }}" target="_blank" rel="noopener">WhatsApp {{ contact.whatsapp_label }}</a>
@@ -47,73 +47,73 @@
   </div>
 
   <form class="contact-form" id="contact-form" novalidate>
-    <label>РРјСЏ
-      <input name="name" required autocomplete="name" placeholder="РљР°Рє Рє РІР°Рј РѕР±СЂР°С‰Р°С‚СЊСЃСЏ">
+    <label>Имя
+      <input name="name" required autocomplete="name" placeholder="Как к вам обращаться">
     </label>
     <div class="two-cols">
       <label>Email
         <input name="email" type="email" autocomplete="email" placeholder="name@example.com">
       </label>
-      <label>РўРµР»РµС„РѕРЅ
+      <label>Телефон
         <input name="phone" autocomplete="tel" placeholder="+972...">
       </label>
     </div>
 
-    <label>РљС‚Рѕ РІС‹?
+    <label>Кто вы?
       <select name="client_type">
-        <option value="">Р’С‹Р±РµСЂРёС‚Рµ РІР°СЂРёР°РЅС‚</option>
-        <option value="web_designer">Р’РµР±-РґРёР·Р°Р№РЅРµСЂ</option>
-        <option value="wordpress_developer">WordPress-СЂР°Р·СЂР°Р±РѕС‚С‡РёРє</option>
-        <option value="seo_specialist">SEO-СЃРїРµС†РёР°Р»РёСЃС‚</option>
-        <option value="marketer">РњР°СЂРєРµС‚РѕР»РѕРі</option>
-        <option value="small_agency">РќРµР±РѕР»СЊС€РѕРµ Р°РіРµРЅС‚СЃС‚РІРѕ</option>
-        <option value="freelancer">Р¤СЂРёР»Р°РЅСЃРµСЂ</option>
-        <option value="business_owner">Р’Р»Р°РґРµР»РµС† Р±РёР·РЅРµСЃР°</option>
-        <option value="other">Р”СЂСѓРіРѕРµ</option>
+        <option value="">Выберите вариант</option>
+        <option value="web_designer">Веб-дизайнер</option>
+        <option value="wordpress_developer">WordPress-разработчик</option>
+        <option value="seo_specialist">SEO-специалист</option>
+        <option value="marketer">Маркетолог</option>
+        <option value="small_agency">Небольшое агентство</option>
+        <option value="freelancer">Фрилансер</option>
+        <option value="business_owner">Владелец бизнеса</option>
+        <option value="other">Другое</option>
       </select>
     </label>
 
-    <label>Р§С‚Рѕ РІР°СЃ РёРЅС‚РµСЂРµСЃСѓРµС‚?
+    <label>Что вас интересует?
       <select name="interest" id="interest-select" required>
-        <option value="">Р’С‹Р±РµСЂРёС‚Рµ РІР°СЂРёР°РЅС‚</option>
-        <option value="ai_site_consultant" {% if selected_interest == "ai_site_consultant" %}selected{% endif %}>AI-РєРѕРЅСЃСѓР»СЊС‚Р°РЅС‚ РґР»СЏ СЃР°Р№С‚Р° РєР»РёРµРЅС‚Р°</option>
-        <option value="smart_lead_form" {% if selected_interest == "smart_lead_form" %}selected{% endif %}>РЈРјРЅР°СЏ С„РѕСЂРјР° Р·Р°СЏРІРєРё</option>
-        <option value="website_development" {% if selected_interest == "website_development" %}selected{% endif %}>Р Р°Р·СЂР°Р±РѕС‚РєР° СЃР°Р№С‚Р° / landing page</option>
-        <option value="lead_automation" {% if selected_interest == "lead_automation" %}selected{% endif %}>РђРІС‚РѕРјР°С‚РёР·Р°С†РёСЏ Р·Р°СЏРІРѕРє</option>
-        <option value="wordpress_integration" {% if selected_interest == "wordpress_integration" %}selected{% endif %}>РџРѕРґРєР»СЋС‡РµРЅРёРµ Рє WordPress-СЃР°Р№С‚Сѓ</option>
-        <option value="white_label" {% if selected_interest == "white_label" %}selected{% endif %}>White-label СЃРѕС‚СЂСѓРґРЅРёС‡РµСЃС‚РІРѕ</option>
-        <option value="ongoing_partnership" {% if selected_interest == "ongoing_partnership" %}selected{% endif %}>РџРѕСЃС‚РѕСЏРЅРЅРѕРµ РїР°СЂС‚РЅС‘СЂСЃС‚РІРѕ</option>
-        <option value="other" {% if selected_interest == "other" %}selected{% endif %}>Р”СЂСѓРіРѕРµ</option>
+        <option value="">Выберите вариант</option>
+        <option value="ai_site_consultant" {% if selected_interest == "ai_site_consultant" %}selected{% endif %}>AI-консультант для сайта клиента</option>
+        <option value="smart_lead_form" {% if selected_interest == "smart_lead_form" %}selected{% endif %}>Умная форма заявки</option>
+        <option value="website_development" {% if selected_interest == "website_development" %}selected{% endif %}>Разработка сайта / landing page</option>
+        <option value="lead_automation" {% if selected_interest == "lead_automation" %}selected{% endif %}>Автоматизация заявок</option>
+        <option value="wordpress_integration" {% if selected_interest == "wordpress_integration" %}selected{% endif %}>Подключение к WordPress-сайту</option>
+        <option value="white_label" {% if selected_interest == "white_label" %}selected{% endif %}>White-label сотрудничество</option>
+        <option value="ongoing_partnership" {% if selected_interest == "ongoing_partnership" %}selected{% endif %}>Постоянное партнёрство</option>
+        <option value="other" {% if selected_interest == "other" %}selected{% endif %}>Другое</option>
       </select>
     </label>
 
-    <label>Р•СЃС‚СЊ Р»Рё СѓР¶Рµ РєР»РёРµРЅС‚ РёР»Рё РїСЂРѕРµРєС‚?
+    <label>Есть ли уже клиент или проект?
       <select name="project_status">
-        <option value="">Р’С‹Р±РµСЂРёС‚Рµ РІР°СЂРёР°РЅС‚</option>
-        <option value="has_client">Р”Р°, РµСЃС‚СЊ РєРѕРЅРєСЂРµС‚РЅС‹Р№ РєР»РёРµРЅС‚</option>
-        <option value="has_idea">Р•СЃС‚СЊ РёРґРµСЏ, РЅРѕ РєР»РёРµРЅС‚Р° РµС‰С‘ РЅРµС‚</option>
-        <option value="exploring_partnership">РҐРѕС‡Сѓ РїРѕСЃРјРѕС‚СЂРµС‚СЊ РІР°СЂРёР°РЅС‚С‹ СЃРѕС‚СЂСѓРґРЅРёС‡РµСЃС‚РІР°</option>
-        <option value="just_researching">РџРѕРєР° РїСЂРѕСЃС‚Рѕ РёР·СѓС‡Р°СЋ</option>
+        <option value="">Выберите вариант</option>
+        <option value="has_client">Да, есть конкретный клиент</option>
+        <option value="has_idea">Есть идея, но клиента ещё нет</option>
+        <option value="exploring_partnership">Хочу посмотреть варианты сотрудничества</option>
+        <option value="just_researching">Пока просто изучаю</option>
       </select>
     </label>
 
-    <label>РљРѕСЂРѕС‚РєРѕ РѕРїРёС€РёС‚Рµ Р·Р°РґР°С‡Сѓ
-      <textarea name="message" rows="5" required placeholder="РќР°РїСЂРёРјРµСЂ: СЏ РґРµР»Р°СЋ СЃР°Р№С‚ РґР»СЏ РєР»РёРµРЅС‚Р° РІ СЃС„РµСЂРµ СЂРµРјРѕРЅС‚Р°, С…РѕС‡Сѓ РґРѕР±Р°РІРёС‚СЊ AI-РєРѕРЅСЃСѓР»СЊС‚Р°РЅС‚Р° РёР»Рё СѓРјРЅСѓСЋ С„РѕСЂРјСѓ Р·Р°СЏРІРєРё."></textarea>
+    <label>Коротко опишите задачу
+      <textarea name="message" rows="5" required placeholder="Например: я делаю сайт для клиента в сфере ремонта, хочу добавить AI-консультанта или умную форму заявки."></textarea>
     </label>
 
     <input type="hidden" name="project_id" id="project-id-field" value="{{ selected_project_id or '' }}">
     <input type="hidden" name="source_page" value="{{ request.url }}">
-    <button class="button primary large" type="submit">РћС‚РїСЂР°РІРёС‚СЊ Р·Р°СЏРІРєСѓ</button>
+    <button class="button primary large" type="submit">Отправить заявку</button>
     <p class="form-status" id="form-status" role="status"></p>
   </form>
 
   <div class="contact-success" id="contact-success" hidden>
-    <p class="eyebrow">Р“РѕС‚РѕРІРѕ</p>
-    <h2>Р—Р°СЏРІРєР° РѕС‚РїСЂР°РІР»РµРЅР°</h2>
-    <p>РЎРїР°СЃРёР±Рѕ. РЇ РїРѕСЃРјРѕС‚СЂСЋ СЃРѕРѕР±С‰РµРЅРёРµ Рё СЃРІСЏР¶СѓСЃСЊ СЃ РІР°РјРё, С‡С‚РѕР±С‹ РѕР±СЃСѓРґРёС‚СЊ Р·Р°РґР°С‡Сѓ РёР»Рё С„РѕСЂРјР°С‚ СЃРѕС‚СЂСѓРґРЅРёС‡РµСЃС‚РІР°.</p>
+    <p class="eyebrow">Готово</p>
+    <h2>Заявка отправлена</h2>
+    <p>Спасибо. Я посмотрю сообщение и свяжусь с вами, чтобы обсудить задачу или формат сотрудничества.</p>
     <div class="actions">
-      <a class="button primary" href="/projects">РџРѕСЃРјРѕС‚СЂРµС‚СЊ Р¶РёРІС‹Рµ РґРµРјРѕ</a>
-      <a class="button" href="/for-partners">Р’РµСЂРЅСѓС‚СЊСЃСЏ Рє РїР°СЂС‚РЅС‘СЂР°Рј</a>
+      <a class="button primary" href="/projects">Посмотреть живые демо</a>
+      <a class="button" href="/for-partners">Вернуться к партнёрам</a>
     </div>
   </div>
 </section>
@@ -159,19 +159,19 @@
     payload.session_id = window.PortfolioAnalytics?.getSessionId?.();
 
     if (!payload.name?.trim()) {
-      statusNode.textContent = "РЈРєР°Р¶РёС‚Рµ РёРјСЏ.";
+      statusNode.textContent = "Укажите имя.";
       return;
     }
     if (!payload.phone?.trim() && !payload.email?.trim()) {
-      statusNode.textContent = "РЈРєР°Р¶РёС‚Рµ email РёР»Рё С‚РµР»РµС„РѕРЅ, С‡С‚РѕР±С‹ СЏ РјРѕРі СЃРІСЏР·Р°С‚СЊСЃСЏ СЃ РІР°РјРё.";
+      statusNode.textContent = "Укажите email или телефон, чтобы я мог связаться с вами.";
       return;
     }
     if (!payload.interest?.trim()) {
-      statusNode.textContent = "Р’С‹Р±РµСЂРёС‚Рµ, С‡С‚Рѕ РІР°СЃ РёРЅС‚РµСЂРµСЃСѓРµС‚.";
+      statusNode.textContent = "Выберите, что вас интересует.";
       return;
     }
     if (!payload.message?.trim() || payload.message.trim().length < 5) {
-      statusNode.textContent = "РЎРѕРѕР±С‰РµРЅРёРµ СЃР»РёС€РєРѕРј РєРѕСЂРѕС‚РєРѕРµ. РќР°РїРёС€РёС‚Рµ РїР°СЂСѓ СЃР»РѕРІ Рѕ Р·Р°РґР°С‡Рµ.";
+      statusNode.textContent = "Сообщение слишком короткое. Напишите пару слов о задаче.";
       return;
     }
 
@@ -190,7 +190,7 @@
     }
     const data = await response.json().catch(() => ({}));
     statusNode.classList.remove("success");
-    statusNode.textContent = data.detail || "РџСЂРѕРІРµСЂСЊС‚Рµ РёРјСЏ, РєРѕРЅС‚Р°РєС‚ Рё РѕРїРёСЃР°РЅРёРµ Р·Р°РґР°С‡Рё.";
+    statusNode.textContent = data.detail || "Проверьте имя, контакт и описание задачи.";
   });
 </script>
 {% endblock %}
