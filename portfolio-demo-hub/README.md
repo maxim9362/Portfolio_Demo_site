@@ -163,7 +163,7 @@ APP_HOST=0.0.0.0
 APP_PORT=8000
 
 SITE_NAME=AI Automation
-SITE_URL=https://izrdeveloper.com
+SITE_URL=http://izrdeveloper.com
 CONTACT_TELEGRAM=your_telegram
 CONTACT_EMAIL=you@example.com
 CONTACT_WHATSAPP=972500000000
@@ -177,7 +177,7 @@ CONTACT_PHOTO_URL=/static/img/maxim-profile.jpg
 
 ```text
 local URL: http://localhost/admin
-production URL: https://izrdeveloper.com/admin
+production URL: http://izrdeveloper.com/admin
 login/password задаются через ADMIN_USERNAME и ADMIN_PASSWORD
 ```
 
