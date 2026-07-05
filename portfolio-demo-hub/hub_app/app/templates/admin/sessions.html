@@ -1,44 +1,56 @@
-{# Admin visitor sessions list: user journeys with event/demo/lead counters. #}
+{# Admin visitor sessions list: readable user journeys instead of raw technical ids. #}
 {% extends "admin/base_admin.html" %}
-{% block title %}Сессии{% endblock %}
+{% block title %}Путь пользователя{% endblock %}
 {% block content %}
 <div class="admin-title">
   <div>
     <p class="eyebrow">Путь пользователя</p>
-    <h1>Сессии</h1>
+    <h1>Посещения сайта</h1>
+    <p class="muted">Одна карточка — это один браузер/посетитель. Боты здесь не показываются, они вынесены в отдельный раздел.</p>
   </div>
+  <a class="button small" href="/admin/bots">Боты отдельно</a>
 </div>
 
-<div class="table-wrap">
-  <table>
-    <thead>
-      <tr>
-        <th>Session ID</th>
-        <th>Начало</th>
-        <th>Последняя активность</th>
-        <th>Длительность</th>
-        <th>Событий</th>
-        <th>Проектов</th>
-        <th>Демо</th>
-        <th>Заявка</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for row in sessions %}
-      <tr>
-        <td><a href="/admin/sessions/{{ row.item.session_id }}">{{ row.item.session_id }}</a></td>
-        <td>{{ row.item.started_at }}</td>
-        <td>{{ row.item.last_seen_at or "" }}</td>
-        <td>{{ row.duration }}</td>
-        <td>{{ row.event_count }}</td>
-        <td>{{ row.viewed_projects }}</td>
-        <td>{{ row.demo_count }}</td>
-        <td>{{ "да" if row.has_lead else "нет" }}</td>
-      </tr>
-      {% else %}
-      <tr><td colspan="8">Сессий пока нет.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
+<section class="session-feed">
+  {% for row in sessions %}
+  <article class="session-card">
+    <div class="session-card-main">
+      <div class="session-card-head">
+        <div>
+          <span class="status-pill">{{ row.status }}</span>
+          <h2>Посетитель {{ loop.index }}</h2>
+        </div>
+        <a class="button small" href="/admin/sessions/{{ row.item.session_id }}">Открыть путь</a>
+      </div>
+
+      <p class="session-summary">{{ row.summary }}</p>
+
+      <div class="session-meta">
+        <span>Первый экран: {{ row.first_page or "не определён" }}</span>
+        <span>Последний экран: {{ row.last_page or "не определён" }}</span>
+        <span>Начало: {{ row.started_at }}</span>
+        <span>Последняя активность: {{ row.last_seen_at }}</span>
+      </div>
+    </div>
+
+    <div class="session-stats">
+      <div><span>Время</span><strong>{{ row.duration }}</strong></div>
+      <div><span>Страниц</span><strong>{{ row.page_count }}</strong></div>
+      <div><span>Демо</span><strong>{{ row.demo_count }}</strong></div>
+      <div><span>Заявка</span><strong>{{ "да" if row.has_lead else "нет" }}</strong></div>
+    </div>
+
+    <details class="session-technical">
+      <summary>Технические данные</summary>
+      <code>{{ row.item.session_id }}</code>
+      <span>{{ row.event_count }} событий, {{ row.viewed_projects }} проектов</span>
+    </details>
+  </article>
+  {% else %}
+  <div class="empty-state">
+    <h2>Посещений пока нет</h2>
+    <p class="muted">Когда посетители начнут открывать сайт, их путь появится здесь.</p>
+  </div>
+  {% endfor %}
+</section>
 {% endblock %}

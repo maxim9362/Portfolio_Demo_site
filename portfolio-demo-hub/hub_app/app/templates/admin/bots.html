@@ -1,0 +1,118 @@
+{# Admin bots page: crawler traffic kept outside the main human analytics. #}
+{% extends "admin/base_admin.html" %}
+{% block title %}Боты{% endblock %}
+{% block content %}
+<div class="admin-title">
+  <div>
+    <p class="eyebrow">Отдельно от основной аналитики</p>
+    <h1>Боты и краулеры</h1>
+    <p class="muted">Здесь показываются поисковые роботы, preview-боты мессенджеров и SEO-краулеры. В основной аналитике они не учитываются.</p>
+  </div>
+</div>
+
+<section class="metric-grid">
+  <div class="metric-card">
+    <span>Bot sessions</span>
+    <strong>{{ metrics.bot_sessions }}</strong>
+  </div>
+  <div class="metric-card">
+    <span>Bot events</span>
+    <strong>{{ metrics.bot_events }}</strong>
+  </div>
+  <div class="metric-card">
+    <span>Bot page views</span>
+    <strong>{{ metrics.bot_page_views }}</strong>
+  </div>
+</section>
+
+<section class="admin-section detail-grid-admin">
+  <div>
+    <h2>Какие боты заходили</h2>
+    <div class="list-panel">
+      {% for name, count in bot_names %}
+      <div><span>{{ name or "Unknown bot" }}</span><strong>{{ count }}</strong></div>
+      {% else %}<p>Ботов пока нет.</p>{% endfor %}
+    </div>
+  </div>
+  <div>
+    <h2>Какие страницы смотрели</h2>
+    <div class="list-panel">
+      {% for page, count in bot_pages %}
+      <div><span>{{ page }}</span><strong>{{ count }}</strong></div>
+      {% else %}<p>Просмотров пока нет.</p>{% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="admin-section">
+  <h2>Последние bot events</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Когда</th>
+          <th>Бот</th>
+          <th>Событие</th>
+          <th>Страница</th>
+          <th>Session ID</th>
+          <th>Данные</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for event in event_rows %}
+        <tr>
+          <td>
+            <strong>{{ event.time_ago }}</strong><br>
+            <span class="muted">{{ event.created_at }}</span>
+          </td>
+          <td>{{ event.item.bot_name or "Unknown bot" }}</td>
+          <td>
+            <span class="status-pill">{{ event.label }}</span>
+            <div class="cell-text">{{ event.description }}</div>
+          </td>
+          <td class="cell-url">{{ event.page }}</td>
+          <td>
+            {% if event.item.session_id %}
+              <a href="/admin/sessions/{{ event.item.session_id }}">{{ event.session_short }}</a>
+            {% endif %}
+          </td>
+          <td class="cell-text">{{ event.item.metadata_json or "" }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6">Событий ботов пока нет.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="admin-section">
+  <h2>Bot sessions</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Session ID</th>
+          <th>Бот</th>
+          <th>Последняя активность</th>
+          <th>Длительность</th>
+          <th>User-Agent</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in bot_sessions %}
+        <tr>
+          <td><a href="/admin/sessions/{{ item.session_id }}">{{ item.session_id }}</a></td>
+          <td>{{ item.bot_name or "Unknown bot" }}</td>
+          <td>{{ item.last_seen_at or "" }}</td>
+          <td>{{ duration(item.duration_seconds) }}</td>
+          <td class="cell-text">{{ item.user_agent or "" }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5">Bot sessions пока нет.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

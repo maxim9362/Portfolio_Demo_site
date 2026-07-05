@@ -96,6 +96,16 @@ EVENT_TONES = {
 NOISY_DASHBOARD_EVENTS = {"heartbeat"}
 
 
+def human_events(query):
+    """Keep crawler traffic out of the main analytics views."""
+    return query.filter(AnalyticsEvent.is_bot.is_(False))
+
+
+def human_sessions(query):
+    """Keep crawler sessions out of the main visitor journey views."""
+    return query.filter(VisitorSession.is_bot.is_(False))
+
+
 def require_admin(credentials: HTTPBasicCredentials = Depends(security)) -> str:
     """Basic Auth dependency used by every admin route."""
     settings = get_settings()
@@ -189,6 +199,43 @@ def short_id(value: str | None) -> str:
     if len(value) <= 18:
         return value
     return f"{value[:14]}..."
+
+
+def session_status_label(item: VisitorSession) -> str:
+    """Return a simple live/finished label for a visitor session."""
+    if item.ended_at:
+        return "Завершена"
+    if item.last_seen_at:
+        current = datetime.now(UTC)
+        last_seen = item.last_seen_at if item.last_seen_at.tzinfo else item.last_seen_at.replace(tzinfo=UTC)
+        if (current - last_seen).total_seconds() < 180:
+            return "Активна сейчас"
+    return "Неактивна"
+
+
+def session_summary(
+    event_count: int,
+    viewed_projects: int,
+    demo_count: int,
+    has_lead: bool,
+    first_page: str,
+    last_page: str,
+) -> str:
+    """Explain a session in human words instead of raw counters only."""
+    parts: list[str] = []
+    if first_page:
+        parts.append(f"начал с {first_page}")
+    if last_page and last_page != first_page:
+        parts.append(f"последняя страница {last_page}")
+    if viewed_projects:
+        parts.append(f"смотрел проектов: {viewed_projects}")
+    if demo_count:
+        parts.append(f"запускал демо: {demo_count}")
+    if has_lead:
+        parts.append("оставил заявку")
+    if not parts:
+        parts.append(f"событий: {event_count}")
+    return "; ".join(parts)
 
 
 def time_on_page_seconds(event: AnalyticsEvent, db: Session) -> int | None:
@@ -311,15 +358,18 @@ def project_options() -> list[dict[str, Any]]:
 @router.get("/", response_class=HTMLResponse)
 def dashboard(request: Request, _: str = Depends(require_admin), db: Session = Depends(get_db)) -> HTMLResponse:
     """Admin overview with core portfolio metrics and the latest events."""
-    total_page_views = db.query(AnalyticsEvent).filter(AnalyticsEvent.event_type == "page_view").count()
-    unique_sessions = db.query(VisitorSession).count()
+    total_page_views = human_events(db.query(AnalyticsEvent)).filter(AnalyticsEvent.event_type == "page_view").count()
+    unique_sessions = human_sessions(db.query(VisitorSession)).count()
+    bot_sessions = db.query(VisitorSession).filter(VisitorSession.is_bot.is_(True)).count()
+    bot_events = db.query(AnalyticsEvent).filter(AnalyticsEvent.is_bot.is_(True)).count()
     leads_count = db.query(ContactLead).count()
-    demo_launches = db.query(DemoSession).count()
-    admin_opens = db.query(AnalyticsEvent).filter(AnalyticsEvent.event_type == "admin_tab_open").count()
-    avg_site = round(db.query(func.avg(VisitorSession.duration_seconds)).scalar() or 0)
+    demo_launches = human_events(db.query(AnalyticsEvent)).filter(AnalyticsEvent.event_type == "demo_launch").count()
+    admin_opens = human_events(db.query(AnalyticsEvent)).filter(AnalyticsEvent.event_type == "admin_tab_open").count()
+    avg_site = round(human_sessions(db.query(func.avg(VisitorSession.duration_seconds))).scalar() or 0)
     avg_demo = round(db.query(func.avg(DemoSession.duration_seconds)).scalar() or 0)
     popular_project_row = (
         db.query(AnalyticsEvent.project_id, func.count(AnalyticsEvent.id).label("count"))
+        .filter(AnalyticsEvent.is_bot.is_(False))
         .filter(AnalyticsEvent.project_id.isnot(None))
         .filter(AnalyticsEvent.event_type.in_(["project_view", "demo_launch", "project_demo_button_click"]))
         .group_by(AnalyticsEvent.project_id)
@@ -328,6 +378,7 @@ def dashboard(request: Request, _: str = Depends(require_admin), db: Session = D
     )
     recent_events = (
         db.query(AnalyticsEvent)
+        .filter(AnalyticsEvent.is_bot.is_(False))
         .filter(AnalyticsEvent.event_type.notin_(NOISY_DASHBOARD_EVENTS))
         .order_by(AnalyticsEvent.created_at.desc())
         .limit(12)
@@ -346,6 +397,8 @@ def dashboard(request: Request, _: str = Depends(require_admin), db: Session = D
                 "avg_site": duration(avg_site),
                 "avg_demo": duration(avg_demo),
                 "popular_project": popular_project_row[0] if popular_project_row else "none",
+                "bot_sessions": bot_sessions,
+                "bot_events": bot_events,
             },
             "recent_events": [event_row(event, db) for event in recent_events],
         },
@@ -430,17 +483,22 @@ def update_lead_status(lead_id: int, new_status: str, request: Request, db: Sess
 @router.get("/sessions", response_class=HTMLResponse)
 def sessions(request: Request, _: str = Depends(require_admin), db: Session = Depends(get_db)) -> HTMLResponse:
     """Show visitor sessions enriched with event, demo, project, and lead counts."""
-    items = db.query(VisitorSession).order_by(VisitorSession.last_seen_at.desc().nullslast()).limit(300).all()
+    items = human_sessions(db.query(VisitorSession)).order_by(VisitorSession.last_seen_at.desc().nullslast()).limit(300).all()
     session_ids = [item.session_id for item in items]
+    if not session_ids:
+        return templates.TemplateResponse("admin/sessions.html", {"request": request, "sessions": []})
+
     event_counts = dict(
         db.query(AnalyticsEvent.session_id, func.count(AnalyticsEvent.id))
         .filter(AnalyticsEvent.session_id.in_(session_ids))
+        .filter(AnalyticsEvent.is_bot.is_(False))
         .group_by(AnalyticsEvent.session_id)
         .all()
     )
     viewed_projects = dict(
         db.query(AnalyticsEvent.session_id, func.count(distinct(AnalyticsEvent.project_id)))
         .filter(AnalyticsEvent.session_id.in_(session_ids))
+        .filter(AnalyticsEvent.is_bot.is_(False))
         .filter(AnalyticsEvent.event_type == "project_view")
         .filter(AnalyticsEvent.project_id.isnot(None))
         .group_by(AnalyticsEvent.session_id)
@@ -460,16 +518,58 @@ def sessions(request: Request, _: str = Depends(require_admin), db: Session = De
         .distinct()
         .all()
     }
+    useful_events = (
+        db.query(AnalyticsEvent)
+        .filter(AnalyticsEvent.session_id.in_(session_ids))
+        .filter(AnalyticsEvent.is_bot.is_(False))
+        .filter(AnalyticsEvent.event_type.in_(["page_view", "project_view", "demo_launch", "contact_submit"]))
+        .order_by(AnalyticsEvent.created_at.asc())
+        .all()
+    )
+    first_pages: dict[str, str] = {}
+    last_pages: dict[str, str] = {}
+    page_counts: dict[str, int] = {}
+    for event in useful_events:
+        if not event.session_id:
+            continue
+        page = clean_page_url(event.page_url)
+        if page:
+            first_pages.setdefault(event.session_id, page)
+            last_pages[event.session_id] = page
+        if event.event_type == "page_view":
+            page_counts[event.session_id] = page_counts.get(event.session_id, 0) + 1
+
     rows = []
     for item in items:
+        event_count = event_counts.get(item.session_id, 0)
+        viewed_project_count = viewed_projects.get(item.session_id, 0)
+        demo_count = demo_counts.get(item.session_id, 0)
+        has_lead = item.session_id in lead_session_ids
+        first_page = first_pages.get(item.session_id, "")
+        last_page = last_pages.get(item.session_id, "")
         rows.append(
             {
                 "item": item,
-                "event_count": event_counts.get(item.session_id, 0),
-                "viewed_projects": viewed_projects.get(item.session_id, 0),
-                "demo_count": demo_counts.get(item.session_id, 0),
-                "has_lead": item.session_id in lead_session_ids,
+                "short_id": short_id(item.session_id),
+                "started_at": format_datetime(item.started_at),
+                "last_seen_at": format_datetime(item.last_seen_at),
+                "status": session_status_label(item),
+                "event_count": event_count,
+                "page_count": page_counts.get(item.session_id, 0),
+                "viewed_projects": viewed_project_count,
+                "demo_count": demo_count,
+                "has_lead": has_lead,
                 "duration": duration(item.duration_seconds),
+                "first_page": first_page,
+                "last_page": last_page,
+                "summary": session_summary(
+                    event_count,
+                    viewed_project_count,
+                    demo_count,
+                    has_lead,
+                    first_page,
+                    last_page,
+                ),
             }
         )
     return templates.TemplateResponse("admin/sessions.html", {"request": request, "sessions": rows})
@@ -512,9 +612,10 @@ def session_detail(session_id: str, request: Request, _: str = Depends(require_a
 @router.get("/analytics", response_class=HTMLResponse)
 def analytics(request: Request, _: str = Depends(require_admin), db: Session = Depends(get_db)) -> HTMLResponse:
     """Show raw events plus page, project, demo, admin, and conversion summaries."""
-    events = db.query(AnalyticsEvent).order_by(AnalyticsEvent.created_at.desc()).limit(300).all()
+    events = human_events(db.query(AnalyticsEvent)).order_by(AnalyticsEvent.created_at.desc()).limit(300).all()
     popular_pages = (
         db.query(AnalyticsEvent.page_url, func.count(AnalyticsEvent.id).label("count"))
+        .filter(AnalyticsEvent.is_bot.is_(False))
         .filter(AnalyticsEvent.event_type == "page_view")
         .filter(AnalyticsEvent.page_url.isnot(None))
         .group_by(AnalyticsEvent.page_url)
@@ -565,6 +666,66 @@ def analytics(request: Request, _: str = Depends(require_admin), db: Session = D
     )
 
 
+@router.get("/bots", response_class=HTMLResponse)
+def bots(request: Request, _: str = Depends(require_admin), db: Session = Depends(get_db)) -> HTMLResponse:
+    """Show crawler and preview-bot traffic separately from human analytics."""
+    bot_sessions_count = db.query(VisitorSession).filter(VisitorSession.is_bot.is_(True)).count()
+    bot_events_count = db.query(AnalyticsEvent).filter(AnalyticsEvent.is_bot.is_(True)).count()
+    bot_page_views = (
+        db.query(AnalyticsEvent)
+        .filter(AnalyticsEvent.is_bot.is_(True))
+        .filter(AnalyticsEvent.event_type == "page_view")
+        .count()
+    )
+    bot_names = (
+        db.query(AnalyticsEvent.bot_name, func.count(AnalyticsEvent.id).label("count"))
+        .filter(AnalyticsEvent.is_bot.is_(True))
+        .group_by(AnalyticsEvent.bot_name)
+        .order_by(func.count(AnalyticsEvent.id).desc())
+        .limit(30)
+        .all()
+    )
+    bot_pages = (
+        db.query(AnalyticsEvent.page_url, func.count(AnalyticsEvent.id).label("count"))
+        .filter(AnalyticsEvent.is_bot.is_(True))
+        .filter(AnalyticsEvent.page_url.isnot(None))
+        .group_by(AnalyticsEvent.page_url)
+        .order_by(func.count(AnalyticsEvent.id).desc())
+        .limit(30)
+        .all()
+    )
+    recent_bot_events = (
+        db.query(AnalyticsEvent)
+        .filter(AnalyticsEvent.is_bot.is_(True))
+        .order_by(AnalyticsEvent.created_at.desc())
+        .limit(100)
+        .all()
+    )
+    recent_bot_sessions = (
+        db.query(VisitorSession)
+        .filter(VisitorSession.is_bot.is_(True))
+        .order_by(VisitorSession.last_seen_at.desc().nullslast())
+        .limit(50)
+        .all()
+    )
+    return templates.TemplateResponse(
+        "admin/bots.html",
+        {
+            "request": request,
+            "metrics": {
+                "bot_sessions": bot_sessions_count,
+                "bot_events": bot_events_count,
+                "bot_page_views": bot_page_views,
+            },
+            "bot_names": bot_names,
+            "bot_pages": [(clean_page_url(page), count) for page, count in bot_pages],
+            "event_rows": [event_row(event, db) for event in recent_bot_events],
+            "bot_sessions": recent_bot_sessions,
+            "duration": duration,
+        },
+    )
+
+
 @router.get("/demo-sessions", response_class=HTMLResponse)
 def demo_sessions(
     request: Request,
@@ -575,6 +736,8 @@ def demo_sessions(
 ) -> HTMLResponse:
     """List wrapper-level demo sessions with filters and duration labels."""
     query = db.query(DemoSession)
+    human_session_ids = human_sessions(db.query(VisitorSession.session_id))
+    query = query.filter(DemoSession.session_id.in_(human_session_ids))
     if project_id:
         query = query.filter(DemoSession.project_id == project_id)
     if status_filter:
@@ -628,6 +791,7 @@ def _event_counts(db: Session, event_type: str) -> list[tuple[str, int]]:
         (row[0], row[1])
         for row in (
             db.query(AnalyticsEvent.project_id, func.count(AnalyticsEvent.id).label("count"))
+            .filter(AnalyticsEvent.is_bot.is_(False))
             .filter(AnalyticsEvent.event_type == event_type)
             .filter(AnalyticsEvent.project_id.isnot(None))
             .group_by(AnalyticsEvent.project_id)

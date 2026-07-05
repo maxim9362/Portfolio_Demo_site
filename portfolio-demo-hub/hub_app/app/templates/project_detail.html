@@ -393,6 +393,14 @@
   document.querySelectorAll("[data-share-demo]").forEach((button) => {
     const originalText = button.textContent;
     const demoUrl = new URL(`/launch/${button.dataset.projectId}`, window.location.origin).toString();
+    const showCopiedState = (text = "Ссылка скопирована") => {
+      button.textContent = text;
+      button.classList.add("copied");
+      window.setTimeout(() => {
+        button.textContent = originalText;
+        button.classList.remove("copied");
+      }, 3200);
+    };
 
     button.addEventListener("click", async () => {
       try {
@@ -404,14 +412,9 @@
           });
         } else if (navigator.clipboard) {
           await navigator.clipboard.writeText(demoUrl);
-          button.textContent = "Ссылка скопирована";
-          button.classList.add("copied");
-          window.setTimeout(() => {
-            button.textContent = originalText;
-            button.classList.remove("copied");
-          }, 2200);
+          showCopiedState();
         } else {
-          window.prompt("Скопируйте ссылку на демо:", demoUrl);
+          showCopiedState(`Ссылка: ${demoUrl}`);
         }
         window.PortfolioAnalytics?.track?.("demo_share_link", {
           project_id: button.dataset.projectId,
@@ -419,7 +422,7 @@
         });
       } catch (error) {
         if (error?.name !== "AbortError") {
-          window.prompt("Скопируйте ссылку на демо:", demoUrl);
+          showCopiedState(`Ссылка: ${demoUrl}`);
         }
       }
     });

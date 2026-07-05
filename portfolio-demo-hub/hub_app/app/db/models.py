@@ -46,6 +46,9 @@ class VisitorSession(Base):
     duration_seconds: Mapped[int | None] = mapped_column(Integer)
     ip_hash: Mapped[str | None] = mapped_column(String(128))
     user_agent: Mapped[str | None] = mapped_column(Text)
+    is_bot: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    bot_name: Mapped[str | None] = mapped_column(String(120))
+    traffic_type: Mapped[str] = mapped_column(String(40), default="human", nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
@@ -61,6 +64,8 @@ class AnalyticsEvent(Base):
     project_id: Mapped[str | None] = mapped_column(String(120), index=True)
     page_url: Mapped[str | None] = mapped_column(String(500))
     metadata_json: Mapped[str | None] = mapped_column(Text)
+    is_bot: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    bot_name: Mapped[str | None] = mapped_column(String(120))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
