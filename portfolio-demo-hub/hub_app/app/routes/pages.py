@@ -4,7 +4,7 @@ from uuid import uuid4
 from xml.sax.saxutils import escape
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from fastapi.responses import HTMLResponse, Response
+from fastapi.responses import FileResponse, HTMLResponse, Response
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
@@ -16,7 +16,7 @@ from app.services.project_loader import get_project, load_projects
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
-DEFAULT_OG_IMAGE = "/static/img/maxim-profile.jpg"
+DEFAULT_OG_IMAGE = "/static/img/og-image.png"
 
 # Project-specific meta descriptions override short descriptions for SEO snippets.
 PROJECT_META_DESCRIPTIONS = {
@@ -56,8 +56,10 @@ def professional_service_schema() -> dict:
     return {
         "@context": "https://schema.org",
         "@type": "ProfessionalService",
-        "name": "AI Automation",
+        "name": "IZR Developer",
         "url": site_url(),
+        "logo": absolute_url("/static/img/android-chrome-512x512.png"),
+        "image": absolute_url(DEFAULT_OG_IMAGE),
         "description": (
             "Технический партнёр для дизайнеров, WordPress-разработчиков, SEO-специалистов "
             "и маркетологов: AI-консультанты, умные формы заявок, автоматизация и "
@@ -280,6 +282,12 @@ def robots_txt() -> Response:
         ]
     )
     return Response(body, media_type="text/plain")
+
+
+@router.get("/favicon.ico", include_in_schema=False)
+def favicon() -> FileResponse:
+    """Serve the browser favicon from the static image bundle."""
+    return FileResponse("app/static/img/favicon.ico", media_type="image/x-icon")
 
 
 @router.get("/sitemap.xml", response_class=Response)

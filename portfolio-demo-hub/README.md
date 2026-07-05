@@ -153,7 +153,7 @@ POSTGRES_USER=portfolio
 POSTGRES_PASSWORD=portfolio
 
 ADMIN_USERNAME=admin
-ADMIN_PASSWORD=change_me
+ADMIN_PASSWORD=change_me_strong_password
 
 PROJECTS_ROOT=/projects
 DEMO_INTERNAL_BASE_URL=http://nginx
@@ -163,7 +163,7 @@ APP_HOST=0.0.0.0
 APP_PORT=8000
 
 SITE_NAME=AI Automation
-SITE_URL=http://localhost
+SITE_URL=https://izrdeveloper.com
 CONTACT_TELEGRAM=your_telegram
 CONTACT_EMAIL=you@example.com
 CONTACT_WHATSAPP=972500000000
@@ -172,6 +172,14 @@ CONTACT_PHOTO_URL=/static/img/maxim-profile.jpg
 ```
 
 Для production обязательно замените `ADMIN_PASSWORD`, `POSTGRES_PASSWORD`, контакты и домен.
+
+Админка Portfolio Hub:
+
+```text
+local URL: http://localhost/admin
+production URL: https://izrdeveloper.com/admin
+login/password задаются через ADMIN_USERNAME и ADMIN_PASSWORD
+```
 
 ## 9. Основные URL
 
