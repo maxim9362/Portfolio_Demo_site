@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     )
     admin_username: str = Field("admin", alias="ADMIN_USERNAME")
     admin_password: str = Field("change_me", alias="ADMIN_PASSWORD")
+    admin_timezone: str = Field("Asia/Jerusalem", alias="ADMIN_TIMEZONE")
     app_env: str = Field("development", alias="APP_ENV")
     site_url: str = Field("http://localhost", alias="SITE_URL")
     contact_telegram: str = Field("your_telegram", alias="CONTACT_TELEGRAM")

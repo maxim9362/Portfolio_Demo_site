@@ -10,9 +10,24 @@
   <a class="button small" href="/">Открыть сайт</a>
 </div>
 
+<section class="visit-period-panel">
+  <div>
+    <span>Посещения за период</span>
+    <strong>{{ metrics.visits_period_count }}</strong>
+    <small>{{ metrics.visits_period_label }}</small>
+  </div>
+  <nav class="period-tabs" aria-label="Фильтр посещений">
+    {% for option in visit_periods %}
+      <a class="button small {% if option.active %}primary active{% endif %}" href="/admin?visits_period={{ option.key }}">
+        {{ option.label }} · {{ option.count }}
+      </a>
+    {% endfor %}
+  </nav>
+</section>
+
 <div class="metric-grid">
   <div><span>Просмотров страниц</span><strong>{{ metrics.page_views }}</strong></div>
-  <div><span>Посетителей / сессий</span><strong>{{ metrics.unique_sessions }}</strong></div>
+  <div><span>Всего посещений</span><strong>{{ metrics.unique_sessions }}</strong></div>
   <div><span>Заявок</span><strong>{{ metrics.leads }}</strong></div>
   <div><span>Запусков демо</span><strong>{{ metrics.demo_launches }}</strong></div>
   <div><span>Открытий админки</span><strong>{{ metrics.admin_opens }}</strong></div>

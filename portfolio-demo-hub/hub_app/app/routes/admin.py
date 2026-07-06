@@ -1,9 +1,10 @@
 """Protected admin pages for leads, analytics, visitors, demos, and projects."""
 
 import secrets
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any
 from urllib.parse import parse_qsl, urlencode, urlparse
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -94,6 +95,11 @@ EVENT_TONES = {
 }
 
 NOISY_DASHBOARD_EVENTS = {"heartbeat"}
+VISIT_PERIODS = {
+    "24h": ("24 часа", timedelta(hours=24)),
+    "7d": ("7 дней", timedelta(days=7)),
+    "30d": ("30 дней", timedelta(days=30)),
+}
 
 
 def human_events(query):
@@ -154,7 +160,21 @@ def format_datetime(value: datetime | None) -> str:
     """Format database datetimes into compact labels for admin screens."""
     if not value:
         return ""
-    return value.strftime("%d.%m.%Y %H:%M")
+    return admin_local_datetime(value).strftime("%d.%m.%Y %H:%M")
+
+
+def admin_local_datetime(value: datetime) -> datetime:
+    """Convert stored UTC/database datetimes into the configured admin timezone."""
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=UTC)
+    try:
+        timezone = ZoneInfo(get_settings().admin_timezone)
+    except ZoneInfoNotFoundError:
+        timezone = ZoneInfo("Asia/Jerusalem")
+    return value.astimezone(timezone)
+
+
+templates.env.filters["admin_datetime"] = format_datetime
 
 
 def time_ago(value: datetime | None) -> str:
@@ -354,12 +374,49 @@ def project_options() -> list[dict[str, Any]]:
     return load_projects()
 
 
+def visit_period_context(db: Session, selected_period: str | None) -> dict[str, Any]:
+    """Build dashboard visit counters for quick 24h/7d/30d filters."""
+    selected = selected_period if selected_period in VISIT_PERIODS else "24h"
+    now = datetime.now(UTC)
+    options = []
+    selected_count = 0
+    for key, (label, delta) in VISIT_PERIODS.items():
+        cutoff = now - delta
+        count = (
+            human_sessions(db.query(VisitorSession))
+            .filter(VisitorSession.started_at >= cutoff)
+            .count()
+        )
+        if key == selected:
+            selected_count = count
+        options.append(
+            {
+                "key": key,
+                "label": label,
+                "count": count,
+                "active": key == selected,
+            }
+        )
+    return {
+        "selected": selected,
+        "selected_label": VISIT_PERIODS[selected][0],
+        "selected_count": selected_count,
+        "options": options,
+    }
+
+
 @router.get("", response_class=HTMLResponse)
 @router.get("/", response_class=HTMLResponse)
-def dashboard(request: Request, _: str = Depends(require_admin), db: Session = Depends(get_db)) -> HTMLResponse:
+def dashboard(
+    request: Request,
+    visits_period: str | None = None,
+    _: str = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> HTMLResponse:
     """Admin overview with core portfolio metrics and the latest events."""
     total_page_views = human_events(db.query(AnalyticsEvent)).filter(AnalyticsEvent.event_type == "page_view").count()
     unique_sessions = human_sessions(db.query(VisitorSession)).count()
+    visits = visit_period_context(db, visits_period)
     bot_sessions = db.query(VisitorSession).filter(VisitorSession.is_bot.is_(True)).count()
     bot_events = db.query(AnalyticsEvent).filter(AnalyticsEvent.is_bot.is_(True)).count()
     leads_count = db.query(ContactLead).count()
@@ -391,6 +448,8 @@ def dashboard(request: Request, _: str = Depends(require_admin), db: Session = D
             "metrics": {
                 "page_views": total_page_views,
                 "unique_sessions": unique_sessions,
+                "visits_period_label": visits["selected_label"],
+                "visits_period_count": visits["selected_count"],
                 "leads": leads_count,
                 "demo_launches": demo_launches,
                 "admin_opens": admin_opens,
@@ -400,6 +459,7 @@ def dashboard(request: Request, _: str = Depends(require_admin), db: Session = D
                 "bot_sessions": bot_sessions,
                 "bot_events": bot_events,
             },
+            "visit_periods": visits["options"],
             "recent_events": [event_row(event, db) for event in recent_events],
         },
     )

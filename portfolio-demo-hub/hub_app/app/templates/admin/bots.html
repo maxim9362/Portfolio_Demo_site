@@ -104,7 +104,7 @@
         <tr>
           <td><a href="/admin/sessions/{{ item.session_id }}">{{ item.session_id }}</a></td>
           <td>{{ item.bot_name or "Unknown bot" }}</td>
-          <td>{{ item.last_seen_at or "" }}</td>
+          <td>{{ item.last_seen_at|admin_datetime }}</td>
           <td>{{ duration(item.duration_seconds) }}</td>
           <td class="cell-text">{{ item.user_agent or "" }}</td>
         </tr>

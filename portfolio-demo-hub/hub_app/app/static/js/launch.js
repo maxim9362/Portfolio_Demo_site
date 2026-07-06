@@ -13,6 +13,7 @@
   const returnUrl = body.dataset.returnUrl;
   let demoDeletePath = body.dataset.demoDeletePath;
   let activeTab = "demo";
+  const peekControls = document.querySelector("[data-launch-peek]");
 
   function withParams(path) {
     const url = new URL(path, window.location.origin);
@@ -76,9 +77,41 @@
     button.addEventListener("click", () => openTab(button.dataset.launchTab));
   });
 
-  document.querySelector("[data-new-chat]")?.addEventListener("click", async () => {
-    const button = document.querySelector("[data-new-chat]");
-    button.disabled = true;
+  function setPanelCollapsed(isCollapsed) {
+    body.classList.toggle("launch-panel-collapsed", isCollapsed);
+    body.classList.toggle("demo-shell-collapsed", isCollapsed);
+    body.dataset.collapsed = isCollapsed ? "true" : "false";
+    if (peekControls) {
+      if (isCollapsed) {
+        peekControls.hidden = false;
+        peekControls.removeAttribute("hidden");
+      } else {
+        peekControls.hidden = true;
+        peekControls.setAttribute("hidden", "");
+      }
+    }
+  }
+
+  document.addEventListener("click", (event) => {
+    const target = event.target instanceof Element ? event.target : null;
+    const hideButton = target?.closest("[data-launch-panel-hide]");
+    const showButton = target?.closest("[data-launch-panel-show]");
+    if (hideButton) {
+      event.preventDefault();
+      setPanelCollapsed(true);
+      return;
+    }
+    if (showButton) {
+      event.preventDefault();
+      setPanelCollapsed(false);
+    }
+  });
+
+  async function startNewDemoSession() {
+    const buttons = document.querySelectorAll("[data-new-chat], [data-new-chat-compact]");
+    buttons.forEach((button) => {
+      button.disabled = true;
+    });
     try {
       await fetch(`/api/demo-session/${encodeURIComponent(demoSessionId)}/finish`, {
         method: "POST",
@@ -87,14 +120,11 @@
         keepalive: true
       }).catch(() => {});
 
-      const newSessionPart = globalThis.crypto?.randomUUID
-        ? globalThis.crypto.randomUUID()
-        : String(Date.now());
       const response = await fetch(`/api/demo-session/${encodeURIComponent(projectId)}/start`, {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
-          session_id: `session_${newSessionPart}`,
+          session_id: sessionId,
           previous_demo_session_id: demoSessionId,
           page_url: window.location.href
         })
@@ -110,8 +140,14 @@
       openTab("demo");
       track("demo_tab_open");
     } finally {
-      button.disabled = false;
+      buttons.forEach((button) => {
+        button.disabled = false;
+      });
     }
+  }
+
+  document.querySelectorAll("[data-new-chat], [data-new-chat-compact]").forEach((button) => {
+    button.addEventListener("click", startNewDemoSession);
   });
 
   document.querySelector("[data-finish-demo]").addEventListener("click", async () => {
@@ -124,5 +160,6 @@
     window.location.href = returnUrl;
   });
 
+  setPanelCollapsed(false);
   openTab("demo");
 })();

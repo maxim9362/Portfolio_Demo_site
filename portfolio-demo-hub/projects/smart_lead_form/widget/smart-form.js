@@ -232,18 +232,29 @@
     render();
   }
 
+  function scrollToEmbeddedForm() {
+    var target = document.getElementById(containerId);
+    if (!target) {
+      return;
+    }
+
+    var topOffset = window.matchMedia("(max-width: 520px)").matches ? 86 : 120;
+    var targetTop = target.getBoundingClientRect().top + window.scrollY - topOffset;
+    window.scrollTo({
+      top: Math.max(0, targetTop),
+      behavior: "smooth"
+    });
+  }
+
   function openWidgetFromPage() {
     if (isEmbedded) {
-      var target = document.getElementById(containerId);
-      if (target) {
-        target.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
       state.isOpen = true;
       if (state.screen === "welcome") {
         startForm();
       } else {
         render();
       }
+      window.requestAnimationFrame(scrollToEmbeddedForm);
       return;
     }
 

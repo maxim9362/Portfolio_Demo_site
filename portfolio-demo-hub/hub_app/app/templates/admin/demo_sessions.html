@@ -54,9 +54,9 @@
         <td><a href="/admin/demo-sessions/{{ item.demo_session_id }}">{{ item.demo_session_id }}</a></td>
         <td>{% if item.session_id %}<a href="/admin/sessions/{{ item.session_id }}">{{ item.session_id }}</a>{% endif %}</td>
         <td>{{ item.project_id }}</td>
-        <td>{{ item.started_at }}</td>
-        <td>{{ item.last_seen_at or "" }}</td>
-        <td>{{ item.ended_at or "" }}</td>
+        <td>{{ item.started_at|admin_datetime }}</td>
+        <td>{{ item.last_seen_at|admin_datetime }}</td>
+        <td>{{ item.ended_at|admin_datetime }}</td>
         <td>{{ format_duration(duration(item)) }}</td>
         <td>{{ "да" if item.opened_demo else "нет" }}</td>
         <td>{{ "да" if item.opened_admin else "нет" }}</td>

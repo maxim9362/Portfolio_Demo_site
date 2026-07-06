@@ -288,7 +288,7 @@
 .slf-widget-button {
   position: fixed;
   right: 24px;
-  bottom: 24px;
+  bottom: calc(24px + env(safe-area-inset-bottom));
   z-index: 9998;
   box-sizing: border-box;
   max-width: min(320px, calc(100vw - 32px));
@@ -324,11 +324,11 @@
 
 .slf-modal {
   width: min(420px, 100%);
-  max-height: min(720px, calc(100vh - 40px));
+  max-height: min(720px, calc(100dvh - 40px));
 }
 
 .slf-modal .slf-card {
-  max-height: min(720px, calc(100vh - 40px));
+  max-height: min(720px, calc(100dvh - 40px));
   overflow: hidden;
   box-shadow: 0 22px 70px rgba(15, 23, 42, 0.32);
 }
@@ -636,14 +636,65 @@
 }
 
 @media (max-width: 520px) {
+  .slf-widget-button {
+    right: 12px;
+    bottom: calc(72px + env(safe-area-inset-bottom));
+    max-width: min(180px, calc(100vw - 24px));
+    min-height: 46px;
+    padding: 10px 13px;
+    border-radius: 999px;
+    font-size: 13px;
+    line-height: 1.1;
+  }
+
   .slf-overlay {
     align-items: flex-end;
-    padding: 10px;
+    justify-content: flex-end;
+    padding: 12px 12px calc(72px + env(safe-area-inset-bottom));
+    background: rgba(15, 23, 42, 0.24);
   }
 
   .slf-modal,
   .slf-modal .slf-card {
-    max-height: calc(100vh - 20px);
+    width: min(330px, calc(100vw - 24px));
+    max-height: min(520px, calc(100dvh - 160px));
+  }
+
+  .slf-embedded .slf-card {
+    max-height: min(520px, calc(100dvh - 170px));
+    overflow: hidden;
+  }
+
+  .slf-form-header {
+    padding: 12px 13px;
+  }
+
+  .slf-body {
+    padding: 14px 13px;
+  }
+
+  .slf-heading {
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+
+  .slf-text {
+    margin-bottom: 12px;
+  }
+
+  .slf-question {
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+
+  .slf-option-button,
+  .slf-input,
+  .slf-textarea {
+    padding: 10px 11px;
+  }
+
+  .slf-footer {
+    padding: 12px 13px;
   }
 
   .slf-actions {
@@ -2278,17 +2329,45 @@
   }
 
   .demo-floating-cta {
-    right: 16px;
-    bottom: 16px;
-    min-height: 54px;
-    padding: 10px 14px 10px 12px;
+    right: 12px;
+    bottom: calc(72px + env(safe-area-inset-bottom));
+    gap: 7px;
+    min-height: 46px;
+    max-width: min(142px, calc(100vw - 24px));
+    padding: 8px 10px;
+    border-radius: 999px;
+  }
+
+  .demo-floating-cta__dot {
+    width: 28px;
+    height: 28px;
+    flex-basis: 28px;
+    border-radius: 999px;
+  }
+
+  .demo-floating-cta__dot::before {
+    inset: 8px;
+  }
+
+  .demo-floating-cta__dot::after {
+    right: 6px;
+    bottom: 6px;
+    width: 7px;
+    height: 7px;
+  }
+
+  .demo-floating-cta strong {
+    font-size: 12px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .demo-floating-cta small {
+    display: none;
   }
 
   .demo-reset-cta {
-    right: 16px;
-    bottom: 84px;
-    min-height: 48px;
-    padding: 9px 13px;
+    display: none;
   }
 
   .demo-services,

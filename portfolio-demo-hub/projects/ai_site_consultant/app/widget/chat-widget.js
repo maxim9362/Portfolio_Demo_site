@@ -409,14 +409,15 @@
             @media (max-width: 520px) {
                 .uaisc-root {
                     right: 12px;
-                    bottom: 12px;
-                    left: 12px;
+                    bottom: calc(72px + env(safe-area-inset-bottom));
+                    left: auto;
                 }
 
                 .uaisc-launcher {
+                    width: 54px;
                     min-width: 54px;
-                    float: right;
-                    padding: 0 13px;
+                    height: 54px;
+                    padding: 0;
                 }
 
                 .uaisc-launcher-label {
@@ -425,17 +426,81 @@
 
                 .uaisc-panel {
                     position: fixed;
-                    top: 12px;
                     right: 12px;
-                    bottom: 12px;
-                    left: 12px;
-                    width: auto;
-                    height: auto;
+                    bottom: calc(18px + env(safe-area-inset-bottom));
+                    left: auto;
+                    top: auto;
+                    width: min(330px, calc(100vw - 24px));
+                    height: min(430px, calc(100dvh - 150px));
                     min-height: 0;
                 }
 
+                .uaisc-header {
+                    min-height: 54px;
+                    padding: 9px 10px;
+                }
+
+                .uaisc-brand {
+                    width: 32px;
+                    height: 32px;
+                    flex-basis: 32px;
+                    border-radius: 7px;
+                }
+
+                .uaisc-title {
+                    font-size: 13px;
+                }
+
+                .uaisc-status {
+                    font-size: 11px;
+                    margin-top: 1px;
+                }
+
+                .uaisc-close {
+                    width: 32px;
+                    height: 32px;
+                    font-size: 19px;
+                }
+
+                .uaisc-messages {
+                    gap: 10px;
+                    padding: 12px 10px 14px;
+                }
+
                 .uaisc-message {
+                    font-size: 13px;
                     max-width: 86%;
+                    min-height: 34px;
+                    padding: 8px 10px;
+                }
+
+                .uaisc-avatar {
+                    width: 24px;
+                    height: 24px;
+                    flex-basis: 24px;
+                    border-radius: 6px;
+                }
+
+                .uaisc-form {
+                    padding: 8px;
+                }
+
+                .uaisc-composer {
+                    min-height: 44px;
+                    grid-template-columns: minmax(0, 1fr) 36px;
+                    padding: 3px 3px 3px 10px;
+                }
+
+                .uaisc-input {
+                    min-height: 36px;
+                    padding: 8px 0 6px;
+                    font-size: 13px;
+                }
+
+                .uaisc-send {
+                    width: 36px;
+                    height: 36px;
+                    font-size: 19px;
                 }
             }
 

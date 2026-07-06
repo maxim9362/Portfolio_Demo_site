@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
   <title>{{ project.short_title }} demo</title>
-  <link rel="stylesheet" href="/static/css/styles.css">
+  <link rel="stylesheet" href="/static/css/styles.css?v=launch-panel-top-20260706">
 </head>
 <body class="launch-body"
       data-project-id="{{ project.id }}"
@@ -16,12 +16,13 @@
       data-admin-path="{{ project.admin_path }}"
       data-demo-delete-path="{{ project.demo_path }}demo-session/{{ demo_session_id }}"
       data-return-url="/projects/{{ project.id }}">
-  <header class="launch-bar">
+  <header class="launch-bar" id="launch-bar">
     <a class="launch-back" href="/projects/{{ project.id }}">← Назад</a>
     <div class="launch-title">
       <span>{{ project.short_title }}</span>
       <strong>Demo session</strong>
     </div>
+    <button class="launch-toggle" type="button" data-launch-panel-hide aria-controls="launch-bar">Скрыть</button>
     <div class="launch-tabs">
       <button class="button small primary" type="button" data-launch-tab="demo">Демо</button>
       {% if project.has_admin_demo %}
@@ -39,8 +40,12 @@
     {% endif %}
     <button class="button small danger" type="button" data-finish-demo>Завершить демо</button>
   </header>
+  <div class="launch-peek-controls" data-launch-peek hidden>
+    <button class="launch-peek-button" type="button" data-launch-panel-show aria-controls="launch-bar">Панель</button>
+    <button class="launch-peek-button" type="button" data-new-chat-compact>Новая сессия</button>
+  </div>
   <iframe id="demo-frame" title="{{ project.short_title }}" src=""></iframe>
   <script src="/static/js/analytics.js"></script>
-  <script src="/static/js/launch.js"></script>
+  <script src="/static/js/launch.js?v=launch-panel-top-20260706"></script>
 </body>
 </html>

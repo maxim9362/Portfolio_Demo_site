@@ -13,8 +13,8 @@
 <div class="metric-grid">
   <div><span>Project ID</span><strong>{{ item.project_id }}</strong></div>
   <div><span>Session ID</span><strong>{% if item.session_id %}<a href="/admin/sessions/{{ item.session_id }}">{{ item.session_id }}</a>{% endif %}</strong></div>
-  <div><span>Started at</span><strong>{{ item.started_at }}</strong></div>
-  <div><span>Ended at</span><strong>{{ item.ended_at or "" }}</strong></div>
+  <div><span>Started at</span><strong>{{ item.started_at|admin_datetime }}</strong></div>
+  <div><span>Ended at</span><strong>{{ item.ended_at|admin_datetime }}</strong></div>
   <div><span>Duration</span><strong>{{ duration }}</strong></div>
   <div><span>Opened demo</span><strong>{{ "да" if item.opened_demo else "нет" }}</strong></div>
   <div><span>Opened admin</span><strong>{{ "да" if item.opened_admin else "нет" }}</strong></div>
@@ -29,7 +29,7 @@
       <tbody>
         {% for event in events %}
         <tr>
-          <td>{{ event.created_at }}</td>
+          <td>{{ event.created_at|admin_datetime }}</td>
           <td><span class="status-pill">{{ event.event_type }}</span></td>
           <td>{{ event.project_id or "" }}</td>
           <td class="cell-url">{{ event.page_url or "" }}</td>
